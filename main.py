@@ -1,9 +1,13 @@
 import time
 import dbconn
 import pyupbit
+import dotenv
+import os
 
 
+dotenv.load_dotenv()
 bidcnt = 1
+svrno = os.getenv("server_no")
 
 
 def loadmyset(uno):
@@ -428,7 +432,7 @@ for seton in setons:
 while True:
     print("Run Count : ", cnt)
     try:
-        order_cnt_trade(5)
+        order_cnt_trade(svrno)
         cnt = cnt + 1
     except Exception as e:
         print(e)

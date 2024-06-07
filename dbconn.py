@@ -1,12 +1,23 @@
+import os
+
 import pyupbit
 import time
 from datetime import datetime
 import pymysql
 import random
 import pandas as pd
+import dotenv
 
 
-db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+dotenv.load_dotenv()
+hostenv = os.getenv("host")
+userenv = os.getenv("user")
+passwordenv = os.getenv("password")
+dbenv = os.getenv("db")
+charsetenv = os.getenv("charset")
+
+
+db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
 serverNo = 2
 
 
@@ -30,7 +41,7 @@ def check_srv(coinn, perc):
 
 
 def selectUsers(uid, upw):
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur1 = db.cursor()
     row = None
     setkey = None
@@ -51,7 +62,7 @@ def selectUsers(uid, upw):
 
 def listUsers():
     global rows
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur2 = db.cursor()
     row = None
     try:
@@ -68,7 +79,7 @@ def listUsers():
 
 def detailuser(uno):
     global rows
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur3 = db.cursor()
     row = None
     try:
@@ -84,7 +95,7 @@ def detailuser(uno):
 
 
 def setKeys(uno, setkey):
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur4 = db.cursor()
     try:
         sql = "UPDATE pondUser SET setupKey = %s, lastLogin = now() where userNo=%s"
@@ -119,7 +130,7 @@ def check_srv(coinn,perc):
 def checkwallet(uno, setkey):
     global key1, key2, walletitems
     walletitems = []
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur5 = db.cursor()
     sql = "SELECT apiKey1, apiKey2 FROM pondUser WHERE setupKey=%s AND userNo=%s and attrib not like %s"
     cur5.execute(sql,(setkey, uno, '%XXX'))
@@ -140,7 +151,7 @@ def checkwallet(uno, setkey):
 def checkwalletwon(uno, setkey):
     global key1, key2, walletwon
     walletwon = []
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur6 = db.cursor()
     sql = "SELECT apiKey1, apiKey2 FROM pondUser WHERE setupKey=%s AND userNo=%s and attrib not like %s"
     cur6.execute(sql,(setkey, uno, '%XXX'))
@@ -159,7 +170,7 @@ def checkwalletwon(uno, setkey):
 
 def tradehistory(uno, setkey):
     tradelist = []
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur7 = db.cursor()
     sql = "SELECT bidCoin from tradingSetup where userNo = %s and attrib not like %s "
     cur7.execute(sql,(uno, '%XXXUP'))
@@ -181,7 +192,7 @@ def tradehistory(uno, setkey):
 
 
 def checkkey(uno, setkey):
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur8 = db.cursor()
     sql = "SELECT * from pondUser WHERE setupKey=%s AND userNo=%s and attrib not like %s"
     cur8.execute(sql,(setkey, uno, '%XXX'))
@@ -196,7 +207,7 @@ def checkkey(uno, setkey):
 
 
 def erasebid(uno, setkey):
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur9 = db.cursor()
     sql = "SELECT * from pondUser WHERE setupKey=%s AND userNo=%s and attrib not like %s"
     cur9.execute(sql,(setkey, uno, '%XXX'))
@@ -221,7 +232,7 @@ def setupbid(uno, setkey, initbid, bidstep, bidrate, askrate, coinn, svrno, trad
     if chkkey == True:
         try:
             erasebid(uno, setkey)
-            db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit',  charset='utf8')
+            db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
             cur0 = db.cursor()
             sql = "insert into tradingSetup (userNo, initAsset, bidInterval, bidRate, askrate, bidCoin, custKey ,serverNo) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
             cur0.execute(sql, (uno, initbid, bidstep, bidrate, askrate, coinn, tradeset, svrno))
@@ -240,8 +251,7 @@ def setupbidadmin(uno, setkey, settitle, bidstep, stp0, stp1, stp2, stp3, stp4, 
     chkkey = checkkey(uno, setkey)
     if chkkey == True:
         try:
-            db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit',
-                                 charset='utf8')
+            db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
             cur11 = db.cursor()
             sql = ("insert into tradingSets (setTitle, setInterval, step0, step1, step2, step3, step4, step5, step6, step7, step8, step9, inter0, inter1, inter2, inter3, inter4, inter5, inter6, inter7, inter8, inter9, regdate) "
                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now())")
@@ -259,8 +269,7 @@ def setupbidadmin(uno, setkey, settitle, bidstep, stp0, stp1, stp2, stp3, stp4, 
 
 def getsetup(uno):
     try:
-        db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit',
-                             charset='utf8')
+        db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
         cur12 = db.cursor()
         sql = "SELECT bidCoin, initAsset, bidInterval, bidRate, askRate, activeYN, custKey from tradingSetup where userNo=%s and attrib not like %s"
         cur12.execute(sql, (uno, '%XXXUP'))
@@ -275,8 +284,7 @@ def getsetup(uno):
 
 def getsetups(uno):
     try:
-        db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit',
-                             charset='utf8')
+        db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
         cur13 = db.cursor()
         sql = "select * from tradingSetup where userNo=%s and attrib not like %s"
         cur13.execute(sql, (uno, '%XXXUP'))
@@ -290,7 +298,7 @@ def getsetups(uno):
 
 
 def setonoff(uno,yesno):
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur14 = db.cursor()
     try:
         sql = "UPDATE tradingSetup SET activeYN = %s where userNo=%s AND attrib not like %s"
@@ -304,7 +312,7 @@ def setonoff(uno,yesno):
 
 
 def getseton():
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur15 = db.cursor()
     data = []
     print("GetKey !!")
@@ -321,7 +329,7 @@ def getseton():
 
 
 def getsetonsvr(svrNo):
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur16 = db.cursor()
     data = []
     try:
@@ -337,7 +345,7 @@ def getsetonsvr(svrNo):
 
 
 def getupbitkey(uno):
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur17 = db.cursor()
     try:
         sql = "SELECT apiKey1, apiKey2 FROM pondUser WHERE userNo=%s and attrib not like %s"
@@ -352,7 +360,7 @@ def getupbitkey(uno):
 
 
 def clearcache():
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur18 = db.cursor()
     sql = "RESET QUERY CACHE"
     cur18.execute(sql)
@@ -391,7 +399,7 @@ def sellmycoin(uno,coinn):
 
 def selectsets():
     global rows
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur19 = db.cursor()
     row = None
     try:
@@ -408,7 +416,7 @@ def selectsets():
 
 def setdetail(setno):
     global rows
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur20 = db.cursor()
     row = None
     try:
@@ -424,7 +432,7 @@ def setdetail(setno):
 
 def selectsetlist(sint):
     global rows
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur21 = db.cursor()
     row = None
     try:
@@ -442,7 +450,7 @@ def selectsetlist(sint):
 
 
 def setmypasswd(uno, passwd):
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur22 = db.cursor()
     try:
         sql = "UPDATE pondUser SET userPasswd = password(%s) where userNo=%s"
@@ -456,7 +464,7 @@ def setmypasswd(uno, passwd):
 
 
 def updateuserdetail(uno, key1, key2, svrno):
-    db = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur23 = db.cursor()
     try:
         sql= "UPDATE pondUser SET apiKey1 = %s, apiKey2 = %s, serverNo = %s where userNo = %s"
@@ -472,8 +480,7 @@ def updateuserdetail(uno, key1, key2, svrno):
 def updatebidadmin(uno, setkey, settitle, bidstep, stp0, stp1, stp2, stp3, stp4, stp5, stp6, stp7, stp8, stp9, int0, int1, int2, int3, int4, int5, int6, int7, int8, int9, setsno):
     chkkey = checkkey(uno, setkey)
     if chkkey == True:
-        db24 = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit',
-                             charset='utf8')
+        db24 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
         cur24 = db24.cursor()
         try:
             sql = ("UPDATE tradingSets set setTitle = %s, setInterval = %s, step0 = %s, step1 = %s, step2 = %s, step3 = %s, step4 = %s, step5 = %s, step6 = %s, step7 = %s, step8 = %s, step9 = %s, "
@@ -491,7 +498,7 @@ def updatebidadmin(uno, setkey, settitle, bidstep, stp0, stp1, stp2, stp3, stp4,
 
 
 def settingonoff(sno, yesno):
-    db25 = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db25 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur25 = db25.cursor()
     try:
         sql = "UPDATE tradingSets SET useYN = %s where setNo=%s"
@@ -506,7 +513,7 @@ def settingonoff(sno, yesno):
 
 def hotcoinlist():
     global rows
-    db26 = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit', charset='utf8')
+    db26 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur26 = db26.cursor()
     row = None
     try:
@@ -523,8 +530,7 @@ def hotcoinlist():
 
 def sethotcoin(coinn):
     global rows
-    db27 = pymysql.connect(host='swc9004.iptime.org', user='swcdjk', password='core2020', db='anteUpbit',
-                           charset='utf8')
+    db27 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur27 = db27.cursor()
     try:
         sql = "UPDATE hotCoins SET attrib = %s where coinName=%s"
