@@ -1,5 +1,4 @@
 import os
-
 import pyupbit
 import time
 from datetime import datetime
