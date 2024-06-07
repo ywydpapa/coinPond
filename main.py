@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import dbconn
 import pyupbit
 import dotenv
@@ -247,7 +248,9 @@ def order_cnt_trade(svrno):
     except Exception as e:
         print('level 1 Error :', e)
     finally:
+        ntime = datetime.now()
         print('**********')
+        print('거래점검 시간', ntime)
         print('거래점검 완료', cnt)
         print('**********')
         dbconn.clearcache()  # 캐쉬 삭제
