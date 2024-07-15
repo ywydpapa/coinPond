@@ -559,9 +559,9 @@ def trace_trade_method(svrno):
                 #  print(intergap)
                 #  print(intRate)
                 cointrend = get_trend(coinn)
-                #  print(cointrend[0])
-                #  print(cointrend[1])
-                #  print(cointrend[2])
+                # print(cointrend[0])
+                print(cointrend[1])
+                # print(cointrend[2])
                 orderstat = getorders(keys[0], keys[1], myset[6])  # 주문현황 조회
                 globals()['askcnt_{}'.format(seton[0])] = 0
                 globals()['bidcnt_{}'.format(seton[0])] = 0
@@ -582,15 +582,18 @@ def trace_trade_method(svrno):
                     if float(traded["balance"]) > 0:
                         order_mod_ask5(key1, key2, coinn, intRate) #  매도 수정 처리
                     elif globals()['bidcnt_{}'.format(seton[0])] == 0:
-                        bidprice = float(pyupbit.get_current_price(coinn))*0.995
-                        bidprice = calprice(bidprice)
-                        print(bidprice)
-                        totalamt = (float(traded["balance"]) + float(traded["locked"]))*float(traded["avg_buy_price"])
-                        targetamt = round(totalamt * 2)
-                        print(targetamt)
-                        bidvol = targetamt / bidprice
-                        print(bidvol)
-                        add_new_bid(key1, key2, coinn, bidprice, bidvol)
+                        if cointrend[1] > -3:
+                            bidprice = float(pyupbit.get_current_price(coinn))*0.995
+                            bidprice = calprice(bidprice)
+                            print(bidprice)
+                            totalamt = (float(traded["balance"]) + float(traded["locked"]))*float(traded["avg_buy_price"])
+                            targetamt = round(totalamt * 2)
+                            print(targetamt)
+                            bidvol = targetamt / bidprice
+                            print(bidvol)
+                            add_new_bid(key1, key2, coinn, bidprice, bidvol)
+                        else:
+                            pass
                     else:
                         pass
             else:

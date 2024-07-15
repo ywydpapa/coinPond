@@ -429,6 +429,7 @@ def setdetail(setno):
         db.close()
     return rows
 
+
 def selectsetlist(sint):
     global rows
     db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
