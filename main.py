@@ -507,6 +507,8 @@ def get_trend(coinn):
 def order_new_bid_mod (key1, key2, coinn, initAsset, intval, intergap, profit):
     global buyrest, bidasset, bidcnt, askcnt
     print("새로운 주문 함수 실행")
+    cancelaskorder(key1, key2, coinn) # 기존 매도 주문 모두 취소
+    canclebidorder(key1, key2, coinn) # 기존 매수 주문 모두 취소
     preprice = pyupbit.get_current_price(coinn)  # 현재값 로드
     try:
         bidasset = initAsset
@@ -581,7 +583,7 @@ def trace_trade_method(svrno):
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
                     if float(traded["balance"]) > 0:
                         order_mod_ask5(key1, key2, coinn, intRate) #  매도 수정 처리
-                    elif globals()['bidcnt_{}'.format(seton[0])] == 0:
+                    elif globals()['bidcnt_{}'.format(seton[0])] == 0: #  매수주문 없음
                         if cointrend[1] > -3:
                             bidprice = float(pyupbit.get_current_price(coinn))*0.995
                             bidprice = calprice(bidprice)
@@ -594,6 +596,7 @@ def trace_trade_method(svrno):
                             add_new_bid(key1, key2, coinn, bidprice, bidvol)
                         else:
                             pass
+
                     else:
                         pass
             else:
