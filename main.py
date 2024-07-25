@@ -634,7 +634,7 @@ while True:
         #order_cnt_trade(svrno)
         trace_trade_method(svrno)
         cnt = cnt + 1
-        if cnt > 43200:
+        if cnt > 21600:
             cnt = 1
             service_restart()
     except Exception as e:
