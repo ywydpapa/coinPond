@@ -9,7 +9,7 @@ import sys
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-
+mainver = 240725001
 
 def loadmyset(uno):
     mysett = dbconn.getsetups(uno)
