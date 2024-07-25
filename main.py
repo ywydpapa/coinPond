@@ -4,6 +4,7 @@ import dbconn
 import pyupbit
 import dotenv
 import os
+import sys
 
 dotenv.load_dotenv()
 bidcnt = 1
@@ -612,6 +613,10 @@ def trace_trade_method(svrno):
         print('**********')
         dbconn.clearcache()  # 캐쉬 삭제
 
+def service_restart():
+    print("Service Restart")
+    os.execl(sys.executable, sys.executable, *sys.argv)
+
 
 cnt = 1
 setons = dbconn.getseton()
@@ -629,6 +634,9 @@ while True:
         #order_cnt_trade(svrno)
         trace_trade_method(svrno)
         cnt = cnt + 1
+        if cnt > 43200:
+            cnt = 1
+            service_restart()
     except Exception as e:
         print(e)
     finally:
