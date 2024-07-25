@@ -597,7 +597,6 @@ def trace_trade_method(svrno):
                             add_new_bid(key1, key2, coinn, bidprice, bidvol)
                         else:
                             pass
-
                     else:
                         pass
             else:
@@ -634,7 +633,7 @@ while True:
         #order_cnt_trade(svrno)
         trace_trade_method(svrno)
         cnt = cnt + 1
-        if cnt > 21600:
+        if cnt > 3600:
             cnt = 1
             service_restart()
     except Exception as e:
