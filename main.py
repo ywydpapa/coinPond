@@ -583,8 +583,8 @@ def trace_trade_method(svrno):
                     order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate)
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
                     if float(traded["balance"]) > 0:
-                        order_mod_ask5(key1, key2, coinn, intRate) #  매도 수정 처리
-                    elif globals()['bidcnt_{}'.format(seton[0])] == 0: #  매수주문 없음
+                        order_mod_ask5(key1, key2, coinn, intRate) # 매도 수정 처리
+                    elif globals()['bidcnt_{}'.format(seton[0])] == 0: # 매수주문 없음
                         if cointrend[1] > -3:
                             bidprice = float(pyupbit.get_current_price(coinn))*0.995
                             bidprice = calprice(bidprice)
@@ -613,19 +613,20 @@ def trace_trade_method(svrno):
         dbconn.clearcache()  # 캐쉬 삭제
 
 def service_restart():
-    print("Service Restart")
+    tstamp = datetime.now()
+    print("Service Restart : ", tstamp)
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 
 cnt = 1
 setons = dbconn.getseton()
 for seton in setons:
-    globals()['lcnt_{}'.format(seton[0])] = 0  #거래단계 초기화
-    globals()['bcnt_{}'.format(seton[0])] = 0  #점검횟수 초기화
+    globals()['lcnt_{}'.format(seton[0])] = 0  # 거래단계 초기화
+    globals()['bcnt_{}'.format(seton[0])] = 0  # 점검횟수 초기화
     globals()['tcnt_{}'.format(seton[0])] = 0  # 거래 예약 횟수 초기화
     globals()['askcnt_{}'.format(seton[0])] = 0  # 매도거래 수
     globals()['bidcnt_{}'.format(seton[0])] = 0  # 매수거래 수
-    globals()['mysell_{}'.format(seton[0])] = 0  #매도 설정 금액
+    globals()['mysell_{}'.format(seton[0])] = 0  # 매도 설정 금액
     globals()['mybuy_{}'.format(seton[0])] = 0  # 매수 단계 카운트
 while True:
     print("구동 횟수 : ", cnt)
@@ -633,7 +634,7 @@ while True:
         #order_cnt_trade(svrno)
         trace_trade_method(svrno)
         cnt = cnt + 1
-        if cnt > 3600:
+        if cnt > 3600: # 1시간 마다 재시작
             cnt = 1
             service_restart()
     except Exception as e:
