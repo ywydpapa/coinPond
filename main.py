@@ -672,7 +672,7 @@ while True:
         #order_cnt_trade(svrno)
         trace_trade_method(svrno)
         cnt = cnt + 1
-        if cnt > 36: # 1시간 마다 재시작
+        if cnt > 3600: # 1시간 마다 재시작
             cnt = 1
             service_restart()
     except Exception as e:
