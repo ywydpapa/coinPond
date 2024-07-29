@@ -648,6 +648,8 @@ def trace_trade_method(svrno):
 def service_restart():
     tstamp = datetime.now()
     print("Service Restart : ", tstamp)
+    msg = "Server "+str(svrno)+" Service Restart : " + str(tstamp)
+    send_error(msg,'0')
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 def send_error(err,uno):
@@ -670,7 +672,7 @@ while True:
         #order_cnt_trade(svrno)
         trace_trade_method(svrno)
         cnt = cnt + 1
-        if cnt > 3600: # 1시간 마다 재시작
+        if cnt > 36: # 1시간 마다 재시작
             cnt = 1
             service_restart()
     except Exception as e:
