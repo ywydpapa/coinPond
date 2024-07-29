@@ -111,6 +111,9 @@ def canclebidorder(key1, key2, coinn):  # 청산
         else:
             pass
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print('매수주문 에러', e)
 
 
@@ -246,6 +249,9 @@ def order_cnt_trade(svrno):
                     canclebidorder(key1, key2, coinn)
                 print('-----------------------')
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print('level 1 Error :', e)
     finally:
         ntime = datetime.now()
@@ -266,6 +272,9 @@ def order_new_bid(key1, key2, coinn, initAsset, intval, intergap, profit):
         print("시장가 구매", buyrest)
         globals()['tcnt_{}'.format(seton[0])] = 1  # 구매 함으로 설정
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print(e)
     finally:
         print("1단계 매수내역 :", buyrest)
@@ -307,6 +316,9 @@ def order_new_bid2(key1, key2, coinn, initAsset, intval, intergap, profit):  #�
         print("시장가 구매", buyrest)
         globals()['tcnt_{}'.format(seton[0])] = 1  # 구매 함으로 설정
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print(e)
     finally:
         print("1단계 매수내역 :", buyrest)
@@ -352,6 +364,9 @@ def order_mod_ask(key1, key2, coinn, profit):  #이윤 고정식 계산 방식
         selllimitpr(key1, key2, coinn, setprice, setvolume)
         # 새로운 매도 주문
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print('매도주문 갱신 에러 ', e)
     finally:
         print('매도주문 갱신')
@@ -378,6 +393,9 @@ def order_mod_ask2(key1, key2, coinn, profit):  #이윤 변동식 계산 방식
         selllimitpr(key1, key2, coinn, setprice, totalvol)
         # 새로운 매도 주문
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print('매도주문2 갱신 에러 ', e)
     finally:
         print('매도주문2 갱신')
@@ -404,6 +422,9 @@ def order_mod_ask3(key1, key2, coinn, profit):  #분산형 매도주문 생성
         selllimitpr(key1, key2, coinn, setprice, totalvol)
         # 새로운 매도 주문
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print('매도주문 갱신 에러 ', e)
     finally:
         print('매도주문 갱신')
@@ -430,6 +451,9 @@ def order_mod_ask5(key1, key2, coinn, profit):  #이윤 변동식 계산 방식
         selllimitpr(key1, key2, coinn, setprice, totalvol)
         # 새로운 매도 주문
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print('매도주문5 갱신 에러 ', e)
     finally:
         print('매도주문5 갱신')
@@ -500,6 +524,9 @@ def get_trend(coinn):
         trend.extend(lpric)
         trend.extend(volic)
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print("Trend check Error ", e)
     finally:
         return trend, opoint+cpoint+hpoint+lpoint, vpoint
@@ -516,6 +543,9 @@ def order_new_bid_mod (key1, key2, coinn, initAsset, intval, intergap, profit):
         buyrest = buymarketpr(key1, key2, coinn, bidasset)  # 첫번째 설정 구매
         print("시장가 구매", buyrest)
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print(e)
     finally:
         print("1단계 매수내역 :", buyrest)
@@ -603,6 +633,9 @@ def trace_trade_method(svrno):
                 print("User ", myset[1], 'Status is Off')
             print("User ", myset[1], " ", myset[6], " finish")
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print("Error Main Roof :",e)
     finally:
         ntime = datetime.now()
@@ -616,6 +649,9 @@ def service_restart():
     tstamp = datetime.now()
     print("Service Restart : ", tstamp)
     os.execl(sys.executable, sys.executable, *sys.argv)
+
+def send_error(err,uno):
+    dbconn.errlog(err,uno)
 
 
 cnt = 1
@@ -638,6 +674,9 @@ while True:
             cnt = 1
             service_restart()
     except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e,uno)
         print(e)
     finally:
         time.sleep(1)

@@ -544,3 +544,18 @@ def sethotcoin(coinn):
     finally:
         cur27.close()
         db27.close()
+
+
+def errlog(err,userno):
+    global rows
+    db28 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur28 = db28.cursor()
+    try:
+        sql = "INSERT INTO error_Log (error_detail, userNo) VALUES (%s, %s)"
+        cur28.execute(sql,(err, userno))
+        db28.commit()
+    except Exception as e:
+        print('접속오류', e)
+    finally:
+        cur28.close()
+        db28.close()
