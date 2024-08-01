@@ -5,11 +5,16 @@ import pyupbit
 import dotenv
 import os
 import sys
+from dotenv import set_key
+from pathlib import Path
+import requests
 
+env_file_path = Path('.env')
+env_file_path.touch(mode=0o666, exist_ok=True)
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240725001
+mainver = 240801001
 
 def loadmyset(uno):
     mysett = dbconn.getsetups(uno)
@@ -589,12 +594,8 @@ def trace_trade_method(svrno):
                 intergap = trsetting[:10]  # 매수 간격
                 intRate = trsetting[10:20]  # 매수 이율
                 coinn = myset[6]  # 매수 종목
-                #  print(intergap)
-                #  print(intRate)
                 cointrend = get_trend(coinn)
-                # print(cointrend[0])
                 print(cointrend[1])
-                # print(cointrend[2])
                 orderstat = getorders(keys[0], keys[1], myset[6])  # 주문현황 조회
                 globals()['askcnt_{}'.format(seton[0])] = 0
                 globals()['bidcnt_{}'.format(seton[0])] = 0
@@ -611,6 +612,7 @@ def trace_trade_method(svrno):
                 if traded == None:
                     # 최초 거래 실시
                     order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate)
+                    save_lastbuy()
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
                     if float(traded["balance"]) > 0:
                         order_mod_ask5(key1, key2, coinn, intRate) # 매도 수정 처리
@@ -625,8 +627,9 @@ def trace_trade_method(svrno):
                             bidvol = targetamt / bidprice
                             print(bidvol)
                             add_new_bid(key1, key2, coinn, bidprice, bidvol)
+                            save_lastbuy()
                         else:
-                            pass
+                            pass # 대기 5분
                     else:
                         pass
             else:
@@ -648,12 +651,18 @@ def trace_trade_method(svrno):
 def service_restart():
     tstamp = datetime.now()
     print("Service Restart : ", tstamp)
-    msg = "Server "+str(svrno)+" Service Restart : " + str(tstamp)
+    myip = requests.get('http://ip.jsontest.com').json()['ip']
+    msg = "Server "+str(svrno)+" Service Restart : " + str(tstamp) + "  at  "+ str(myip)
     send_error(msg,'0')
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 def send_error(err,uno):
     dbconn.errlog(err,uno)
+
+
+def save_lastbuy():
+    now = datetime.now()
+    set_key(dotenv_path=env_file_path, key_to_set="lastbuy", value_to_set=str(now))
 
 
 cnt = 1
@@ -672,7 +681,7 @@ while True:
         #order_cnt_trade(svrno)
         trace_trade_method(svrno)
         cnt = cnt + 1
-        if cnt > 3600: # 1시간 마다 재시작
+        if cnt > 36: # 1시간 마다 재시작
             cnt = 1
             service_restart()
     except Exception as e:
