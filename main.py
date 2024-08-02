@@ -5,12 +5,9 @@ import pyupbit
 import dotenv
 import os
 import sys
-from dotenv import set_key
-from pathlib import Path
 import requests
+import json
 
-env_file_path = Path('.env')
-env_file_path.touch(mode=0o666, exist_ok=True)
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
@@ -139,7 +136,7 @@ def loadtrset(sno):
 
 
 def order_cnt_trade(svrno):
-    global orderstat, key1, key2, coinn, askcnt, bidcnt, traded
+    global orderstat, key1, key2, coinn, askcnt, bidcnt, traded, seton
     setons = dbconn.getsetonsvr(svrno)  #서버별 사용자 로드
     try:
         for seton in setons:
@@ -577,7 +574,7 @@ def add_new_bid(key1, key2, coinn, bidprice, bidvol):
     print("추가 매수 실행")
 
 def trace_trade_method(svrno):
-    global orderstat, key1, key2, coinn, askcnt, bidcnt, traded
+    global orderstat, key1, key2, coinn, askcnt, bidcnt, traded, seton
     setons = dbconn.getsetonsvr(svrno)  # 서버별 사용자 로드
     try:
         for seton in setons:  # 개별 프로세스 시작
@@ -626,8 +623,13 @@ def trace_trade_method(svrno):
                             print(targetamt)
                             bidvol = targetamt / bidprice
                             print(bidvol)
-                            add_new_bid(key1, key2, coinn, bidprice, bidvol)
-                            save_lastbuy()
+                            dlytime = check_hold(10)
+                            if dlytime == "SALE":
+                                add_new_bid(key1, key2, coinn, bidprice, bidvol)
+                                save_lastbuy()
+                            else:
+                                print("매수 홀딩")
+                                pass
                         else:
                             pass # 대기 5분
                     else:
@@ -661,8 +663,26 @@ def send_error(err,uno):
 
 
 def save_lastbuy():
+    data = { 'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S') }
+    with open('pond.json','w') as f:
+        json.dump(data,f)
+
+
+def check_hold(min):
     now = datetime.now()
-    set_key(dotenv_path=env_file_path, key_to_set="lastbuy", value_to_set=str(now))
+    with open("pond.json", "r") as f:
+        data = json.load(f)
+    last = data['lastbuy']
+    if last != None:
+        past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+        diff = now - past
+        diffmin = diff.seconds/60
+        if diffmin <= min:
+            return "HOLD"
+        else:
+            return "SALE"
+    else:
+        return "EMPT"
 
 
 cnt = 1
