@@ -582,6 +582,7 @@ def trace_trade_method(svrno):
             key1 = keys[0]  # 키로드
             key2 = keys[1]  # 키로드
             myset = loadmyset(seton)  # 트레이딩 셋업로드
+            print("투자설정 내용 : ", myset)
             print("User ", myset[1], "Coin ",myset[6] ," seed ", myset[2], " start")
             if myset[7] == 'Y':  # 주문 ON 인 경우
                 iniAsset = myset[2]  # 기초 투입금액
@@ -615,7 +616,7 @@ def trace_trade_method(svrno):
                         order_mod_ask5(key1, key2, coinn, intRate) # 매도 수정 처리
                     elif globals()['bidcnt_{}'.format(seton[0])] == 0: # 매수주문 없음
                         if cointrend[1] > -3:
-                            bidprice = float(pyupbit.get_current_price(coinn))*0.995
+                            bidprice = float(pyupbit.get_current_price(coinn))*0.99
                             bidprice = calprice(bidprice)
                             print(bidprice)
                             totalamt = (float(traded["balance"]) + float(traded["locked"]))*float(traded["avg_buy_price"])
@@ -623,7 +624,7 @@ def trace_trade_method(svrno):
                             print(targetamt)
                             bidvol = targetamt / bidprice
                             print(bidvol)
-                            dlytime = check_hold(10)
+                            dlytime = check_hold(15)
                             if dlytime == "SALE":
                                 add_new_bid(key1, key2, coinn, bidprice, bidvol)
                                 save_lastbuy()
@@ -666,6 +667,7 @@ def save_lastbuy():
     data = { 'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S') }
     with open('pond.json','w') as f:
         json.dump(data,f)
+    f.close()
 
 
 def check_hold(min):
@@ -682,7 +684,8 @@ def check_hold(min):
         else:
             return "SALE"
     else:
-        return "EMPT"
+        save_lastbuy() #구매 카운트 시작
+    f.close()
 
 
 cnt = 1
