@@ -641,6 +641,8 @@ def trace_trade_method(svrno):
                                 if myset[10] == 'N':
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol)
                                     save_lastbuy()
+                                if myset[10] == 'Y':
+                                    canclebidorder(key1,key2,coinn)
                             else:
                                 print("매수 홀딩")
                                 pass
