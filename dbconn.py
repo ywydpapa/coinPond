@@ -18,7 +18,7 @@ charsetenv = os.getenv("charset")
 
 db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
 serverNo = 2
-
+serviceNo = 240808
 
 def check_srv(coinn, perc):
     values = pyupbit.get_ohlcv(coinn, interval="hour", count=48)
