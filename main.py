@@ -586,7 +586,7 @@ def trace_trade_method(svrno):
             myset = loadmyset(seton)  # 트레이딩 셋업로드
             print("투자설정 내용 : ", myset)
             print("User ", myset[1], "Coin ", myset[6], " seed ", myset[2], " start")
-            bidcount = cntbid(key1, key2, myset[6], myset[2], myset[12]) # 매수 단계 확인
+            bidcount = cntbid(key1, key2, myset[6], myset[2], myset[12])  # 매수 단계 확인
             if myset[7] == 'Y':  # 주문 ON 인 경우
                 iniAsset = myset[2]  # 기초 투입금액
                 interVal = myset[3]  # 매수 횟수
@@ -704,7 +704,8 @@ def check_hold(min):
 
 
 def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn):
-    global cntpos
+    global cntpost
+    cntpost = 0
     orders = getorders(ckey1, ckey2, coinn)
     norasset = [1,3,7,15,31,63,127,255,511,1023]
     dblasset = [1,3,9,27,81,243,729,2187,6561,19683]
@@ -713,11 +714,11 @@ def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn):
             amt = float(order['volume']) * float(order['price'])
             cnt = round(amt/float(iniAsset))
             if dblyn == 'Y':
-                cntpos = dblasset.index(cnt)+1
+                cntpost = dblasset.index(cnt)+1
             else:
-                cntpos = norasset.index(cnt)+1
-            print("매수 카운트 : ", cntpos)
-    return cntpos
+                cntpost = norasset.index(cnt)+1
+            print("매수 카운트 : ", cntpost)
+    return cntpost
 
 
 cnt = 1

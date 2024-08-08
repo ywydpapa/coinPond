@@ -228,11 +228,11 @@ def erasebid(uno, setkey):
 
 def setupbid(uno, setkey, initbid, bidstep, bidrate, askrate, coinn, svrno, tradeset):
     chkkey = checkkey(uno, setkey)
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur0 = db.cursor()
     if chkkey == True:
         try:
             erasebid(uno, setkey)
-            db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
-            cur0 = db.cursor()
             sql = "insert into tradingSetup (userNo, initAsset, bidInterval, bidRate, askrate, bidCoin, custKey ,serverNo) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
             cur0.execute(sql, (uno, initbid, bidstep, bidrate, askrate, coinn, tradeset, svrno))
             db.commit()
@@ -248,10 +248,10 @@ def setupbid(uno, setkey, initbid, bidstep, bidrate, askrate, coinn, svrno, trad
 
 def setupbidadmin(uno, setkey, settitle, bidstep, stp0, stp1, stp2, stp3, stp4, stp5, stp6, stp7, stp8, stp9, int0, int1, int2, int3, int4, int5, int6, int7, int8, int9):
     chkkey = checkkey(uno, setkey)
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur11 = db.cursor()
     if chkkey == True:
         try:
-            db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
-            cur11 = db.cursor()
             sql = ("insert into tradingSets (setTitle, setInterval, step0, step1, step2, step3, step4, step5, step6, step7, step8, step9, inter0, inter1, inter2, inter3, inter4, inter5, inter6, inter7, inter8, inter9, regdate) "
                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now())")
             cur11.execute(sql, (settitle, bidstep, stp0, stp1, stp2, stp3, stp4, stp5, stp6, stp7, stp8, stp9, int0, int1, int2, int3, int4, int5, int6, int7, int8,int9, ))
@@ -267,9 +267,9 @@ def setupbidadmin(uno, setkey, settitle, bidstep, stp0, stp1, stp2, stp3, stp4, 
 
 
 def getsetup(uno):
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur12 = db.cursor()
     try:
-        db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
-        cur12 = db.cursor()
         sql = "SELECT bidCoin, initAsset, bidInterval, bidRate, askRate, activeYN, custKey from tradingSetup where userNo=%s and attrib not like %s"
         cur12.execute(sql, (uno, '%XXXUP'))
         data = list(cur12.fetchone())
@@ -282,9 +282,9 @@ def getsetup(uno):
 
 
 def getsetups(uno):
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur13 = db.cursor()
     try:
-        db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
-        cur13 = db.cursor()
         sql = "select * from tradingSetup where userNo=%s and attrib not like %s"
         cur13.execute(sql, (uno, '%XXXUP'))
         data = list(cur13.fetchone())
