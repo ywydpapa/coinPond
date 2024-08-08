@@ -117,7 +117,7 @@ def canclebidorder(key1, key2, coinn):  # 청산
         myset = loadmyset(seton)
         uno = myset[1]
         send_error(e, uno)
-        print('매수주문 에러', e)
+        print('매수주문취소 에러', e)
 
 
 def checkbidorder(key1, key2, coinn):
@@ -616,6 +616,7 @@ def trace_trade_method(svrno):
                 print(globals()['mybuy_{}'.format(seton[0])])
                 if myset[10] == 'Y':
                     print("홀드 중")
+                    canclebidorder(key1, key2, coinn)
                 else:
                     print("홀드 해제")
                 if traded == None:

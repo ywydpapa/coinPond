@@ -567,7 +567,7 @@ def setholdYN(setno, yn):
     cur29 = db29.cursor()
     try:
         sql = "UPDATE tradingSetup set holdYN = %s where setupNo = %s"
-        cur29.execute(sql, ( yn, setno))
+        cur29.execute(sql, (yn, setno))
         db29.commit()
     except Exception as e:
         print('접속오류', e)
