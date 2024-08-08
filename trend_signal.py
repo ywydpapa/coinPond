@@ -108,5 +108,35 @@ def get_trend4h(coinn):
     except Exception as e:
         print("Trend4h check Error ", e)
     finally:
-        return trend4h, opoint4h+cpoint4h+hpoint4h+lpoint4h, vpoint4h
+        return trend4h, opoint4h+cpoint4h+hpoint4h+lpoint4h, vpoint4h, crprice
 
+
+def get_trendnew(coinn):
+    opoint4h, cpoint4h, hpoint4h, lpoint4h, vpoint4h = 0, 0, 0, 0, 0
+    trend4h = []
+    try:
+        crprice = pyupbit.get_current_price(coinn)
+        candls4h = pyupbit.get_ohlcv(ticker=coinn, interval= "minute15", count=10)
+        candls4h = [candls4h]
+        openpr4h = candls4h[0]['open'].tolist()
+        closepr4h = candls4h[0]['close'].tolist()
+        highpr4h = candls4h[0]['high'].tolist()
+        lowpr4h = candls4h[0]['low'].tolist()
+        volumepr4h = candls4h[0]['volume'].tolist()
+        opric4h, cpric4h, hpric4h, lpric4h, volic4h = [], [], [], [], []
+        print(openpr4h)
+        print(closepr4h)
+        for i in range(0, 9):
+            gap = closepr4h[i] - openpr4h[i]
+            avg = (closepr4h[i] + openpr4h[i])/2
+            grate = round(gap/avg*100, 3)
+            print(gap, grate)
+
+    except Exception as e:
+        print("Trend4h check Error ", e)
+    finally:
+        return None
+
+
+trend = get_trendnew("KRW-XRP")
+print(trend)

@@ -13,6 +13,7 @@ bidcnt = 1
 svrno = os.getenv("server_no")
 mainver = 240801001
 
+
 def loadmyset(uno):
     mysett = dbconn.getsetups(uno)
     return mysett
@@ -115,7 +116,7 @@ def canclebidorder(key1, key2, coinn):  # 청산
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print('매수주문 에러', e)
 
 
@@ -253,7 +254,7 @@ def order_cnt_trade(svrno):
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print('level 1 Error :', e)
     finally:
         ntime = datetime.now()
@@ -276,7 +277,7 @@ def order_new_bid(key1, key2, coinn, initAsset, intval, intergap, profit):
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print(e)
     finally:
         print("1단계 매수내역 :", buyrest)
@@ -320,7 +321,7 @@ def order_new_bid2(key1, key2, coinn, initAsset, intval, intergap, profit):  #�
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print(e)
     finally:
         print("1단계 매수내역 :", buyrest)
@@ -368,7 +369,7 @@ def order_mod_ask(key1, key2, coinn, profit):  #이윤 고정식 계산 방식
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print('매도주문 갱신 에러 ', e)
     finally:
         print('매도주문 갱신')
@@ -397,7 +398,7 @@ def order_mod_ask2(key1, key2, coinn, profit):  #이윤 변동식 계산 방식
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print('매도주문2 갱신 에러 ', e)
     finally:
         print('매도주문2 갱신')
@@ -426,7 +427,7 @@ def order_mod_ask3(key1, key2, coinn, profit):  #분산형 매도주문 생성
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print('매도주문 갱신 에러 ', e)
     finally:
         print('매도주문 갱신')
@@ -455,7 +456,7 @@ def order_mod_ask5(key1, key2, coinn, profit):  #이윤 변동식 계산 방식
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print('매도주문5 갱신 에러 ', e)
     finally:
         print('매도주문5 갱신')
@@ -481,7 +482,7 @@ def get_trend(coinn):
     trend = []
     try:
         crprice = pyupbit.get_current_price(coinn)
-        candls = pyupbit.get_ohlcv(ticker=coinn, interval= "minute1", count=4)
+        candls = pyupbit.get_ohlcv(ticker=coinn, interval="minute1", count=4)
         candls = [candls]
         openpr = candls[0]['open'].tolist()
         closepr = candls[0]['close'].tolist()
@@ -489,35 +490,35 @@ def get_trend(coinn):
         lowpr = candls[0]['low'].tolist()
         volumepr = candls[0]['volume'].tolist()
         opric, cpric, hpric, lpric, volic = [], [], [], [], []
-        for i in range(0,3):
+        for i in range(0, 3):
             if openpr[i + 1] > openpr[i]:
                 opric.append('+')
                 opoint = opoint + 1
-            elif openpr[i+1] <= openpr[i]:
+            elif openpr[i + 1] <= openpr[i]:
                 opric.append('-')
                 opoint = opoint - 1
-            if closepr[i+1] > closepr[i]:
+            if closepr[i + 1] > closepr[i]:
                 cpric.append('+')
                 cpoint = cpoint + 1
-            elif closepr[i+1] <= closepr[i]:
+            elif closepr[i + 1] <= closepr[i]:
                 cpric.append('-')
                 cpoint = cpoint - 1
-            if highpr[i+1] > highpr[i]:
+            if highpr[i + 1] > highpr[i]:
                 hpric.append('+')
                 hpoint = hpoint + 1
-            elif highpr[i+1] <= highpr[i]:
+            elif highpr[i + 1] <= highpr[i]:
                 hpric.append('-')
                 hpoint = hpoint - 1
-            if lowpr[i+1] > lowpr[i]:
+            if lowpr[i + 1] > lowpr[i]:
                 lpric.append('+')
                 lpoint = lpoint + 1
-            elif lowpr[i+1] <= lowpr[i]:
+            elif lowpr[i + 1] <= lowpr[i]:
                 lpric.append('-')
                 lpoint = lpoint - 1
-            if volumepr[i+1] > volumepr[i]:
+            if volumepr[i + 1] > volumepr[i]:
                 volic.append('+')
                 vpoint = vpoint + 1
-            elif volumepr[i+1] <= volumepr[i]:
+            elif volumepr[i + 1] <= volumepr[i]:
                 volic.append('-')
                 vpoint = vpoint - 1
         trend = opric
@@ -528,17 +529,17 @@ def get_trend(coinn):
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print("Trend check Error ", e)
     finally:
-        return trend, opoint+cpoint+hpoint+lpoint, vpoint
+        return trend, opoint + cpoint + hpoint + lpoint, vpoint
 
 
-def order_new_bid_mod (key1, key2, coinn, initAsset, intval, intergap, profit):
+def order_new_bid_mod(key1, key2, coinn, initAsset, intval, intergap, profit):
     global buyrest, bidasset, bidcnt, askcnt
     print("새로운 주문 함수 실행")
-    cancelaskorder(key1, key2, coinn) # 기존 매도 주문 모두 취소
-    canclebidorder(key1, key2, coinn) # 기존 매수 주문 모두 취소
+    cancelaskorder(key1, key2, coinn)  # 기존 매도 주문 모두 취소
+    canclebidorder(key1, key2, coinn)  # 기존 매수 주문 모두 취소
     preprice = pyupbit.get_current_price(coinn)  # 현재값 로드
     try:
         bidasset = initAsset
@@ -547,7 +548,7 @@ def order_new_bid_mod (key1, key2, coinn, initAsset, intval, intergap, profit):
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print(e)
     finally:
         print("1단계 매수내역 :", buyrest)
@@ -557,7 +558,7 @@ def order_new_bid_mod (key1, key2, coinn, initAsset, intval, intergap, profit):
         setvolume = traded['balance']
         selllimitpr(key1, key2, coinn, setprice, setvolume)
     # 추가 예약 매수 실행
-    for i in range(1, intval+1):
+    for i in range(1, intval + 1):
         bidprice = ((preprice * 100) - (preprice * intergap[i])) / 100
         bidprice = calprice(bidprice)
         bidasset = bidasset * 2
@@ -573,6 +574,7 @@ def add_new_bid(key1, key2, coinn, bidprice, bidvol):
     buylimitpr(key1, key2, coinn, bidprice, bidvol)
     print("추가 매수 실행")
 
+
 def trace_trade_method(svrno):
     global orderstat, key1, key2, coinn, askcnt, bidcnt, traded, seton
     setons = dbconn.getsetonsvr(svrno)  # 서버별 사용자 로드
@@ -583,21 +585,26 @@ def trace_trade_method(svrno):
             key2 = keys[1]  # 키로드
             myset = loadmyset(seton)  # 트레이딩 셋업로드
             print("투자설정 내용 : ", myset)
-            print("User ", myset[1], "Coin ",myset[6] ," seed ", myset[2], " start")
+            print("User ", myset[1], "Coin ", myset[6], " seed ", myset[2], " start")
+            bidcount = cntbid(key1, key2, myset[6], myset[2], myset[12]) # 매수 단계 확인
             if myset[7] == 'Y':  # 주문 ON 인 경우
                 iniAsset = myset[2]  # 기초 투입금액
                 interVal = myset[3]  # 매수 횟수
                 trset = myset[8]  # 투자 설정
+                holdpost = myset[11] # 홀드 포지션
+                if bidcount >= holdpost:
+                    dbconn.setholdYN(myset[0] ,'Y')
+                else:
+                    dbconn.setholdYN(myset[0] ,'N')
                 trsetting = loadtrset(trset)  # 투자 설정 로드
                 intergap = trsetting[:10]  # 매수 간격
                 intRate = trsetting[10:20]  # 매수 이율
                 coinn = myset[6]  # 매수 종목
-                cointrend = get_trend(coinn)
-                print(cointrend[1])
+                cointrend = get_trend(coinn)  # 코인 트렌드 검색
                 orderstat = getorders(keys[0], keys[1], myset[6])  # 주문현황 조회
                 globals()['askcnt_{}'.format(seton[0])] = 0
                 globals()['bidcnt_{}'.format(seton[0])] = 0
-                for order in orderstat: # 주문 확인
+                for order in orderstat:  # 주문 확인
                     if order["side"] == 'ask':
                         globals()['askcnt_{}'.format(seton[0])] = globals()['askcnt_{}'.format(seton[0])] + 1
                     elif order["side"] == 'bid':
@@ -607,32 +614,38 @@ def trace_trade_method(svrno):
                 traded = checktraded(keys[0], keys[1], coinn)  # 설정 코인 지갑내 존재 확인
                 print(traded)
                 print(globals()['mybuy_{}'.format(seton[0])])
+                if myset[10] == 'Y':
+                    print("홀드 중")
+                else:
+                    print("홀드 해제")
                 if traded == None:
                     # 최초 거래 실시
                     order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate)
                     save_lastbuy()
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
                     if float(traded["balance"]) > 0:
-                        order_mod_ask5(key1, key2, coinn, intRate) # 매도 수정 처리
-                    elif globals()['bidcnt_{}'.format(seton[0])] == 0: # 매수주문 없음
+                        order_mod_ask5(key1, key2, coinn, intRate)  # 매도 수정 처리
+                    elif globals()['bidcnt_{}'.format(seton[0])] == 0:  # 매수주문 없음
                         if cointrend[1] > -3:
-                            bidprice = float(pyupbit.get_current_price(coinn))*0.99
+                            bidprice = float(pyupbit.get_current_price(coinn)) * 0.99
                             bidprice = calprice(bidprice)
                             print(bidprice)
-                            totalamt = (float(traded["balance"]) + float(traded["locked"]))*float(traded["avg_buy_price"])
+                            totalamt = (float(traded["balance"]) + float(traded["locked"])) * float(
+                                traded["avg_buy_price"])
                             targetamt = round(totalamt * 2)
                             print(targetamt)
                             bidvol = targetamt / bidprice
                             print(bidvol)
                             dlytime = check_hold(15)
                             if dlytime == "SALE":
-                                add_new_bid(key1, key2, coinn, bidprice, bidvol)
-                                save_lastbuy()
+                                if myset[10] == 'N':
+                                    add_new_bid(key1, key2, coinn, bidprice, bidvol)
+                                    save_lastbuy()
                             else:
                                 print("매수 홀딩")
                                 pass
                         else:
-                            pass # 대기 5분
+                            pass  # 대기 5분
                     else:
                         pass
             else:
@@ -641,8 +654,8 @@ def trace_trade_method(svrno):
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
-        print("Error Main Roof :",e)
+        send_error(e, uno)
+        print("Error Main Roof :", e)
     finally:
         ntime = datetime.now()
         print('**********')
@@ -651,22 +664,24 @@ def trace_trade_method(svrno):
         print('**********')
         dbconn.clearcache()  # 캐쉬 삭제
 
+
 def service_restart():
     tstamp = datetime.now()
     print("Service Restart : ", tstamp)
     myip = requests.get('http://ip.jsontest.com').json()['ip']
-    msg = "Server "+str(svrno)+" Service Restart : " + str(tstamp) + "  at  "+ str(myip)
-    send_error(msg,'0')
+    msg = "Server " + str(svrno) + " Service Restart : " + str(tstamp) + "  at  " + str(myip)
+    send_error(msg, '0')
     os.execl(sys.executable, sys.executable, *sys.argv)
 
-def send_error(err,uno):
-    dbconn.errlog(err,uno)
+
+def send_error(err, uno):
+    dbconn.errlog(err, uno)
 
 
 def save_lastbuy():
-    data = { 'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S') }
-    with open('pond.json','w') as f:
-        json.dump(data,f)
+    data = {'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+    with open('pond.json', 'w') as f:
+        json.dump(data, f)
     f.close()
 
 
@@ -678,14 +693,31 @@ def check_hold(min):
     if last != None:
         past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
         diff = now - past
-        diffmin = diff.seconds/60
+        diffmin = diff.seconds / 60
         if diffmin <= min:
             return "HOLD"
         else:
             return "SALE"
     else:
-        save_lastbuy() #구매 카운트 시작
+        save_lastbuy()  #구매 카운트 시작
     f.close()
+
+
+def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn):
+    global cntpos
+    orders = getorders(ckey1, ckey2, coinn)
+    norasset = [1,3,7,15,31,63,127,255,511,1023]
+    dblasset = [1,3,9,27,81,243,729,2187,6561,19683]
+    for order in orders:
+        if order['side'] == 'ask':
+            amt = float(order['volume']) * float(order['price'])
+            cnt = round(amt/float(iniAsset))
+            if dblyn == 'Y':
+                cntpos = dblasset.index(cnt)+1
+            else:
+                cntpos = norasset.index(cnt)+1
+            print("매수 카운트 : ", cntpos)
+    return cntpos
 
 
 cnt = 1
@@ -704,13 +736,13 @@ while True:
         #order_cnt_trade(svrno)
         trace_trade_method(svrno)
         cnt = cnt + 1
-        if cnt > 3600: # 1시간 마다 재시작
+        if cnt > 3600:  # 1시간 마다 재시작
             cnt = 1
             service_restart()
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e,uno)
+        send_error(e, uno)
         print(e)
     finally:
         time.sleep(1)

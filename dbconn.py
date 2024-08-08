@@ -559,3 +559,20 @@ def errlog(err,userno):
     finally:
         cur28.close()
         db28.close()
+
+
+def setholdYN(setno, yn):
+    global rows
+    db29 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur29 = db29.cursor()
+    try:
+        sql = "UPDATE tradingSetup set holdYN = %s where setupNo = %s"
+        cur29.execute(sql, ( yn, setno))
+        db29.commit()
+    except Exception as e:
+        print('접속오류', e)
+    finally:
+        cur29.close()
+        db29.close()
+
+
