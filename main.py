@@ -595,7 +595,7 @@ def trace_trade_method(svrno):
                 if bidcount >= holdpost:
                     dbconn.setholdYN(myset[0] ,'Y')
                 else:
-                    dbconn.setholdYN(myset[0] ,'N')
+                    pass  #  dbconn.setholdYN(myset[0] ,'N')
                 trsetting = loadtrset(trset)  # 투자 설정 로드
                 intergap = trsetting[:10]  # 매수 간격
                 intRate = trsetting[10:20]  # 매수 이율
@@ -618,16 +618,19 @@ def trace_trade_method(svrno):
                     print("홀드 중")
                     canclebidorder(key1, key2, coinn)
                 else:
-                    print("홀드 해제")
+                    print("홀드 해제중")
                 if traded == None:
                     # 최초 거래 실시
                     order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate)
                     save_lastbuy()
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
                     if float(traded["balance"]) > 0:
+                        print("매도 수정 처리 1")
                         order_mod_ask5(key1, key2, coinn, intRate)  # 매도 수정 처리
                     elif globals()['bidcnt_{}'.format(seton[0])] == 0:  # 매수주문 없음
+                        print("매수 주문 없음 check")
                         if cointrend[1] > -3:
+                            print("신호등 긍정 ", cointrend[1])
                             bidprice = float(pyupbit.get_current_price(coinn)) * 0.99
                             bidprice = calprice(bidprice)
                             print(bidprice)
@@ -639,15 +642,16 @@ def trace_trade_method(svrno):
                             print(bidvol)
                             dlytime = check_hold(15)
                             if dlytime == "SALE":
+                                print("딜레이신호등 통과")
                                 if myset[10] == 'N':
+                                    print("홀드 N으로 매수재주문")
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol)
                                     save_lastbuy()
-                                if myset[10] == 'Y':
-                                    canclebidorder(key1,key2,coinn)
                             else:
-                                print("매수 홀딩")
+                                print("딜레이신호등 작동중")
                                 pass
                         else:
+                            print("신호등 부정", cointrend[1])
                             pass  # 대기 5분
                     else:
                         pass
