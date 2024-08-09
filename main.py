@@ -712,20 +712,27 @@ def check_hold(min):
 
 def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn):
     global cntpost
-    cntpost = 0
-    orders = getorders(ckey1, ckey2, coinn)
-    norasset = [1,3,7,15,31,63,127,255,511,1023]
-    dblasset = [1,3,9,27,81,243,729,2187,6561,19683]
-    for order in orders:
-        if order['side'] == 'ask':
-            amt = float(order['volume']) * float(order['price'])
-            cnt = round(amt/float(iniAsset))
-            if dblyn == 'Y':
-                cntpost = dblasset.index(cnt)+1
-            else:
-                cntpost = norasset.index(cnt)+1
+    try:
+        cntpost = 0
+        orders = getorders(ckey1, ckey2, coinn)
+        norasset = [1,3,7,15,31,63,127,255,511,1023]
+        dblasset = [1,3,9,27,81,243,729,2187,6561,19683]
+        for order in orders:
+            if order['side'] == 'ask':
+                amt = float(order['volume']) * float(order['price'])
+                print(amt)
+                cnt = round(amt/float(iniAsset))
+                print(cnt)
+                if dblyn == 'Y':
+                    cntpost = dblasset.index(cnt)+1
+                else:
+                    cntpost = norasset.index(cnt)+1
             print("매수 카운트 : ", cntpost)
-    return cntpost
+    except Exception as e:
+        print("매도 카운트 에러", e)
+        cntpost = 0
+    finally:
+        return cntpost
 
 
 cnt = 1
