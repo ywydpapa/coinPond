@@ -613,7 +613,7 @@ def trace_trade_method(svrno):
                 print("매수요청 수 : ", globals()['bidcnt_{}'.format(seton[0])])  # 매수요청 수
                 traded = checktraded(keys[0], keys[1], coinn)  # 설정 코인 지갑내 존재 확인
                 print(traded)
-                print(globals()['mybuy_{}'.format(seton[0])])
+                # print(globals()['mybuy_{}'.format(seton[0])])
                 if myset[10] == 'Y':
                     print("홀드 중")
                     canclebidorder(key1, key2, coinn)
