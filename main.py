@@ -11,7 +11,7 @@ import json
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240808001
+mainver = 240813001
 
 
 def loadmyset(uno):
@@ -676,7 +676,7 @@ def service_restart():
     tstamp = datetime.now()
     print("Service Restart : ", tstamp)
     myip = requests.get('http://ip.jsontest.com').json()['ip']
-    msg = "Server " + str(svrno) + " Service Restart : " + str(tstamp) + "  at  " + str(myip) + "Service Ver : "+ str(mainver)
+    msg = "Server " + str(svrno) + " Service Restart : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : "+ str(mainver)
     send_error(msg, '0')
     os.execl(sys.executable, sys.executable, *sys.argv)
 
