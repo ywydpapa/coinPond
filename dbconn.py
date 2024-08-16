@@ -570,7 +570,7 @@ def setholdYN(setno, yn):
         cur29.execute(sql, (yn, setno))
         db29.commit()
     except Exception as e:
-        print('접속오류', e)
+        print('접속오류 에러로그', e)
     finally:
         cur29.close()
         db29.close()
@@ -582,10 +582,10 @@ def servicelog(log,userno):
     cur30 = db30.cursor()
     try:
         sql = "INSERT INTO service_Log (service_detail, userNo) VALUES (%s, %s)"
-        cur30.execute(sql,(err, userno))
+        cur30.execute(sql,(log,userno))
         db30.commit()
     except Exception as e:
-        print('접속오류', e)
+        print('접속오류 서비스로그', e)
     finally:
         cur30.close()
         db30.close()
