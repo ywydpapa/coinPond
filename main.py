@@ -8,6 +8,7 @@ import sys
 import requests
 import json
 
+
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
@@ -681,6 +682,14 @@ def service_restart():
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 
+def service_start():
+    tstamp = datetime.now()
+    print("Service Start : ", tstamp)
+    myip = requests.get('http://ip.jsontest.com').json()['ip']
+    msg = "Server " + str(svrno) + " Service Start : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : "+ str(mainver)
+    dbconn.servicelog(msg,0)
+
+
 def send_error(err, uno):
     dbconn.errlog(err, uno)
 
@@ -745,6 +754,9 @@ for seton in setons:
     globals()['bidcnt_{}'.format(seton[0])] = 0  # 매수거래 수
     globals()['mysell_{}'.format(seton[0])] = 0  # 매도 설정 금액
     globals()['mybuy_{}'.format(seton[0])] = 0  # 매수 단계 카운트
+
+service_start() # 시작시간 기록
+
 while True:
     print("구동 횟수 : ", cnt)
     try:

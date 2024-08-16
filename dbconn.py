@@ -576,3 +576,16 @@ def setholdYN(setno, yn):
         db29.close()
 
 
+def servicelog(log,userno):
+    global rows
+    db30 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur30 = db30.cursor()
+    try:
+        sql = "INSERT INTO service_Log (service_detail, userNo) VALUES (%s, %s)"
+        cur30.execute(sql,(err, userno))
+        db30.commit()
+    except Exception as e:
+        print('접속오류', e)
+    finally:
+        cur30.close()
+        db30.close()
