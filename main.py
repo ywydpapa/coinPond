@@ -12,7 +12,7 @@ import json
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240813001
+mainver = 240822001
 
 
 def loadmyset(uno):
@@ -594,7 +594,7 @@ def trace_trade_method(svrno):
                 trset = myset[8]  # 투자 설정
                 holdpost = myset[11] # 홀드 포지션
                 if bidcount >= holdpost:
-                    dbconn.setholdYN(myset[0] ,'Y')
+                    dbconn.setholdYN(myset[0] ,'Y')  # 홀드 설정
                 else:
                     pass  #  dbconn.setholdYN(myset[0] ,'N')
                 trsetting = loadtrset(trset)  # 투자 설정 로드
@@ -614,14 +614,12 @@ def trace_trade_method(svrno):
                 print("매수요청 수 : ", globals()['bidcnt_{}'.format(seton[0])])  # 매수요청 수
                 traded = checktraded(keys[0], keys[1], coinn)  # 설정 코인 지갑내 존재 확인
                 print(traded)
-                # print(globals()['mybuy_{}'.format(seton[0])])
                 if myset[10] == 'Y':
                     print("홀드 중")
                     canclebidorder(key1, key2, coinn)
                 else:
                     print("홀드 해제중")
-                if traded == None:
-                    # 최초 거래 실시
+                if traded == None: # 최초 거래 실시
                     order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate)
                     save_lastbuy()
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
@@ -663,7 +661,7 @@ def trace_trade_method(svrno):
         myset = loadmyset(seton)
         uno = myset[1]
         send_error(e, uno)
-        print("Error Main Roof :", e)
+        print("메인 루프 에러 :", e)
     finally:
         ntime = datetime.now()
         print('**********')
@@ -701,6 +699,13 @@ def save_lastbuy():
     f.close()
 
 
+def save_holdtime():
+    data = {'lasthold': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+    with open('pond.json', 'w') as f:
+        json.dump(data, f)
+    f.close()
+
+
 def check_hold(min):
     now = datetime.now()
     with open("pond.json", "r") as f:
@@ -716,6 +721,24 @@ def check_hold(min):
             return "SALE"
     else:
         save_lastbuy()  #구매 카운트 시작
+    f.close()
+
+
+def check_holdstart(min): # 홀드시작이후 시간 체크
+    now = datetime.now()
+    with open("pond.json", "r") as f:
+        data = json.load(f)
+    last = data['lasthold']
+    if last != None:
+        past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+        diff = now - past
+        diffmin = diff.seconds / 60
+        if diffmin <= min:
+            return "HOLD"
+        else:
+            return "SALE"
+    else:
+        save_holdtime()  #새로운 홀드 카운트 시작
     f.close()
 
 
