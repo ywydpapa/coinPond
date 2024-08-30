@@ -12,7 +12,7 @@ import json
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240830001
+mainver = 240831999
 
 
 def loadmyset(uno):
@@ -442,11 +442,10 @@ def order_mod_ask5(key1, key2, coinn, profit):  #이윤 변동식 계산 방식
     try:
         cancelaskorder(key1, key2, coinn)  # 기존 매도 주문 취소
         tradednew = checktraded(key1, key2, coinn)  # 설정 코인 지갑내 존재 확인
-        totalamt = (float(tradednew['balance']) + float(tradednew['locked'])) * float(
-            tradednew['avg_buy_price'])  # 전체 구매 금액
+        totalamt = (float(tradednew['balance']) + float(tradednew['locked'])) * float(tradednew['avg_buy_price'])  # 전체 구매 금액
         totalvol = float(tradednew['balance']) + float(tradednew['locked'])  # 전체 구매 수량
-        totalamt = totalamt + (totalamt * profit[0] / 100)
-        print("재설정 이윤 :", profit[0])
+        totalamt = totalamt + (totalamt * profit / 100)
+        print("재설정 이윤 :", profit)
         print(totalamt)
         print(totalvol)
         setprice = totalamt / totalvol
@@ -609,7 +608,7 @@ def trace_trade_method(svrno):
                 print("매수 이율 설정 내용 : ", intRate)
                 coinn = myset[6]  # 매수 종목
                 cointrend = get_trend(coinn)  # 코인 트렌드 검색
-                coinsignal = dbconn.getSignal(coinn)
+                coinsignal = dbconn.getSignal(coinn)[0]
                 print("트렌드 시그날 내용 : ",coinsignal)
                 orderstat = getorders(keys[0], keys[1], myset[6])  # 주문현황 조회
                 globals()['askcnt_{}'.format(seton[0])] = 0
@@ -649,15 +648,15 @@ def trace_trade_method(svrno):
                                 targetamt = round(totalamt * 2) # 구매가의 2배 구매
                                 print(targetamt)
                             else:
-                                pbidcnt = globals()['bidcnt_{}'.format(seton[0])]
-                                targetamt = iniAsset * 2^pbidcnt
+                                pbidcnt = globals()['bidcnt_{}'.format(seton[0])]+1
+                                targetamt = iniAsset * 2**pbidcnt
                                 print("구매단계 체크 : ", pbidcnt)
                                 print("주문 금액 체크 : ", targetamt)
                             bidvol = targetamt / bidprice
                             print(bidvol)
                             # 일반 구매 시 딜레이 타임
                             if bidcount >= holdpost:
-                                dlytime = check_hold(15)
+                                dlytime = check_hold(10) #기본 딜레이 신호등
                             else:
                                 dlytime = check_hold(60) # 홀드 구매 시 딜레이타임
                             if dlytime == "SALE":
@@ -791,7 +790,7 @@ def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn):
 cnt = 1
 setons = dbconn.getseton()
 for seton in setons:
-    globals()['lcnt_{}'.format(seton[0])] = 0  # 거래단계 초기화
+    globals()['lcnt_{}'.format(seton[0])] = 0 # 거래단계 초기화
     globals()['bcnt_{}'.format(seton[0])] = 0  # 점검횟수 초기화
     globals()['tcnt_{}'.format(seton[0])] = 0  # 거래 예약 횟수 초기화
     globals()['askcnt_{}'.format(seton[0])] = 0  # 매도거래 수
