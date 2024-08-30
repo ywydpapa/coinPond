@@ -609,7 +609,7 @@ def trace_trade_method(svrno):
                 print("매수 이율 설정 내용 : ", intRate)
                 coinn = myset[6]  # 매수 종목
                 cointrend = get_trend(coinn)  # 코인 트렌드 검색
-                coinsignal = dbconn.getSignal(coinn)
+                coinsignal = dbconn.getSignal(coinn)[0]
                 print("트렌드 시그날 내용 : ",coinsignal)
                 orderstat = getorders(keys[0], keys[1], myset[6])  # 주문현황 조회
                 globals()['askcnt_{}'.format(seton[0])] = 0
