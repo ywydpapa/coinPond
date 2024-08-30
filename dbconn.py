@@ -597,7 +597,7 @@ def getSignal(coinn):
     cur31 = db31.cursor()
     try:
         sql = "SELECT * FROM trendSignal WHERE coinName=%s and attrib NOT LIKE %s"
-        cur31.execute(sql, (coinn, "UDP00%"))
+        cur31.execute(sql, (coinn, "UPD00%"))
         rows = cur31.fetchall()
     except Exception as e:
         print("코인 트렌드 조회 에러 : ",e)
