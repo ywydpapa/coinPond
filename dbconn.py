@@ -589,3 +589,20 @@ def servicelog(log,userno):
     finally:
         cur30.close()
         db30.close()
+
+
+def getSignal(coinn):
+    global rows
+    db31 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur31 = db31.cursor()
+    try:
+        sql = "SELECT * FROM trendSignal WHERE coinName=%s and attrib NOT LIKE %s"
+        cur31.execute(sql, (coinn, "UDP00%"))
+        rows = cur31.fetchall()
+    except Exception as e:
+        print("코인 트렌드 조회 에러 : ",e)
+    finally:
+        cur31.close()
+        db31.close()
+        return rows
+

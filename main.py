@@ -12,7 +12,7 @@ import json
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240822001
+mainver = 240830001
 
 
 def loadmyset(uno):
@@ -577,7 +577,7 @@ def add_new_bid(key1, key2, coinn, bidprice, bidvol):
 
 
 def trace_trade_method(svrno):
-    global orderstat, key1, key2, coinn, askcnt, bidcnt, traded, seton
+    global orderstat, key1, key2, coinn, askcnt, bidcnt, traded, seton, targetamt
     setons = dbconn.getsetonsvr(svrno)  # 서버별 사용자 로드
     try:
         for seton in setons:  # 개별 프로세스 시작
@@ -593,15 +593,24 @@ def trace_trade_method(svrno):
                 interVal = myset[3]  # 매수 횟수
                 trset = myset[8]  # 투자 설정
                 holdpost = myset[11] # 홀드 포지션
-                if bidcount >= holdpost:
-                    dbconn.setholdYN(myset[0] ,'Y')  # 홀드 설정
+                if holdpost > 0:
+                    if bidcount >= holdpost:
+                        dbconn.setholdYN(myset[0] ,'Y')  # 홀드 설정
+                    else:
+                        pass  #  dbconn.setholdYN(myset[0] ,'N')
                 else:
-                    pass  #  dbconn.setholdYN(myset[0] ,'N')
+                    print("홀드 안함")
+                print("매수 카운트 11 : ", bidcount)
+                print("홀드 포지션 11 : ", holdpost)
                 trsetting = loadtrset(trset)  # 투자 설정 로드
                 intergap = trsetting[:10]  # 매수 간격
+                print("매수간격 설정내용 :", intergap)
                 intRate = trsetting[10:20]  # 매수 이율
+                print("매수 이율 설정 내용 : ", intRate)
                 coinn = myset[6]  # 매수 종목
                 cointrend = get_trend(coinn)  # 코인 트렌드 검색
+                coinsignal = dbconn.getSignal(coinn)
+                print("트렌드 시그날 내용 : ",coinsignal)
                 orderstat = getorders(keys[0], keys[1], myset[6])  # 주문현황 조회
                 globals()['askcnt_{}'.format(seton[0])] = 0
                 globals()['bidcnt_{}'.format(seton[0])] = 0
@@ -616,7 +625,7 @@ def trace_trade_method(svrno):
                 print(traded)
                 if myset[10] == 'Y':
                     print("홀드 중")
-                    canclebidorder(key1, key2, coinn)
+                    canclebidorder(key1, key2, coinn) # 전체 매수 주문 취소
                 else:
                     print("홀드 해제중")
                 if traded == None: # 최초 거래 실시
@@ -633,13 +642,22 @@ def trace_trade_method(svrno):
                             bidprice = float(pyupbit.get_current_price(coinn)) * 0.99
                             bidprice = calprice(bidprice)
                             print(bidprice)
-                            totalamt = (float(traded["balance"]) + float(traded["locked"])) * float(
-                                traded["avg_buy_price"])
-                            targetamt = round(totalamt * 2)
-                            print(targetamt)
+                            totalamt = (float(traded["balance"]) + float(traded["locked"])) * float(traded["avg_buy_price"])
+                            if myset[12] == "Y":
+                                targetamt = round(totalamt * 2) # 구매가의 2배 구매
+                                print(targetamt)
+                            else:
+                                pbidcnt = globals()['bidcnt_{}'.format(seton[0])]
+                                targetamt = iniAsset * 2^pbidcnt
+                                print("구매단계 체크 : ", pbidcnt)
+                                print("주문 금액 체크 : ", targetamt)
                             bidvol = targetamt / bidprice
                             print(bidvol)
-                            dlytime = check_hold(15)
+                            # 일반 구매 시 딜레이 타임
+                            if bidcount >= holdpost:
+                                dlytime = check_hold(15)
+                            else:
+                                dlytime = check_hold(60) # 홀드 구매 시 딜레이타임
                             if dlytime == "SALE":
                                 print("딜레이신호등 통과")
                                 if myset[10] == 'N':
@@ -653,6 +671,7 @@ def trace_trade_method(svrno):
                             print("신호등 부정", cointrend[1])
                             pass  # 대기 5분
                     else:
+                        print("매도 대기중")
                         pass
             else:
                 print("User ", myset[1], 'Status is Off')
