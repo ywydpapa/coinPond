@@ -629,12 +629,14 @@ def trace_trade_method(svrno):
                 else:
                     print("홀드 해제중")
                 if traded == None: # 최초 거래 실시
-                    order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate)
+                    order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate[1])
                     save_lastbuy()
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
                     if float(traded["balance"]) > 0:
                         print("매도 수정 처리 1")
-                        order_mod_ask5(key1, key2, coinn, intRate)  # 매도 수정 처리
+                        inrate = intRate[bidcount+1]
+                        print(bidcount," 단계 이율 적용 : ", inrate)
+                        order_mod_ask5(key1, key2, coinn, inrate)  # 매도 수정 처리
                     elif globals()['bidcnt_{}'.format(seton[0])] == 0:  # 매수주문 없음
                         print("매수 주문 없음 check")
                         if cointrend[1] > -3:
