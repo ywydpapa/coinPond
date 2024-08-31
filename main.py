@@ -662,7 +662,7 @@ def trace_trade_method(svrno):
                                 targetamt = round(totalamt * 2) # 구매가의 2배 구매
                                 print(targetamt)
                             else:
-                                pbidcnt = globals()['bidcnt_{}'.format(seton[0])]+1
+                                pbidcnt = bidcount
                                 targetamt = iniAsset * 2**pbidcnt
                                 print("구매단계 체크 : ", pbidcnt)
                                 print("주문 금액 체크 : ", targetamt)
@@ -670,9 +670,9 @@ def trace_trade_method(svrno):
                             print(bidvol)
                             # 일반 구매 시 딜레이 타임
                             if bidcount >= holdpost:
-                                dlytime = check_hold(10) #기본 딜레이 신호등
+                                dlytime = check_hold(60) #기본 딜레이 신호등
                             else:
-                                dlytime = check_hold(60) # 홀드 구매 시 딜레이타임
+                                dlytime = check_hold(10) # 홀드 구매 시 딜레이타임
                             if dlytime == "SALE":
                                 print("딜레이신호등 통과")
                                 if myset[10] == 'N':
@@ -682,12 +682,13 @@ def trace_trade_method(svrno):
                             else:
                                 print("딜레이신호등 작동중")
                                 if pbidcnt == 1:
+                                    print("초기 구매 작동")
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol)
                                     save_lastbuy()
                                 pass
                         else:
                             print("신호등 부정", cointrend[1])
-                            pass  # 대기 5분
+                            pass  # 대기
                     else:
                         print("매도 대기중")
                         pass
@@ -737,7 +738,7 @@ def save_lastbuy():
 
 
 def save_jsonfile():
-    data = {'Start at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+    data = {'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
     with open('pond.json', 'w') as f:
         json.dump(data, f)
     f.close()
