@@ -736,6 +736,13 @@ def save_lastbuy():
     f.close()
 
 
+def save_jsonfile():
+    data = {'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+    with open('pond.json', 'w') as f:
+        json.dump(data, f)
+    f.close()
+
+
 def save_holdtime():
     data = {'lasthold': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
     with open('pond.json', 'w') as f:
@@ -818,7 +825,7 @@ for seton in setons:
     globals()['mybuy_{}'.format(seton[0])] = 0  # 매수 단계 카운트
 
 service_start() # 시작시간 기록
-
+save_jsonfile()
 while True:
     print("구동 횟수 : ", cnt)
     try:
