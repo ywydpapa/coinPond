@@ -553,7 +553,7 @@ def order_new_bid_mod(key1, key2, coinn, initAsset, intval, intergap, profit):
     finally:
         print("1단계 매수내역 :", buyrest)
         traded = checktraded(key1, key2, coinn)  # 설정 코인 지갑내 존재 확인
-        setprice = preprice * (1.0 + (profit[0] / 100.0))
+        setprice = preprice * (1.0 + (profit / 100.0))
         setprice = calprice(setprice)
         setvolume = traded['balance']
         selllimitpr(key1, key2, coinn, setprice, setvolume)
@@ -628,7 +628,7 @@ def trace_trade_method(svrno):
                 else:
                     print("홀드 해제중")
                 if traded == None: # 최초 거래 실시
-                    order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate[1])
+                    order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate[1]) # 구간은 리스트로 이율은 상수로
                     save_lastbuy()
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
                     if float(traded["balance"]) > 0:
