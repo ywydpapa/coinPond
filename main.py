@@ -12,7 +12,7 @@ import json
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240831999
+mainver = 240901001
 
 
 def loadmyset(uno):
@@ -737,7 +737,7 @@ def save_lastbuy():
 
 
 def save_jsonfile():
-    data = {'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+    data = {'Start at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
     with open('pond.json', 'w') as f:
         json.dump(data, f)
     f.close()
