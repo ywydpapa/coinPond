@@ -98,11 +98,20 @@ def calprice(bidprice):
 def cancelaskorder(key1, key2, coinn):  # 매도 주문 취소
     upbit = pyupbit.Upbit(key1, key2)
     orders = upbit.get_order(coinn)
-    for order in orders:
-        print(order)
-        if order['side'] == 'ask':
-            upbit.cancel_order(order['uuid'])
-            print("매도 주문 취소")
+    try:
+        if orders is not None:
+            for order in orders:
+                if order['side'] == 'ask':
+                    upbit.cancel_order(order["uuid"])
+                else:
+                    print("매수 주문 유지")
+        else:
+            pass
+    except Exception as e:
+        myset = loadmyset(seton)
+        uno = myset[1]
+        send_error(e, uno)
+        print('매도주문취소 에러', e)
 
 
 def canclebidorder(key1, key2, coinn):  # 청산
@@ -111,7 +120,10 @@ def canclebidorder(key1, key2, coinn):  # 청산
     try:
         if orders is not None:
             for order in orders:
-                upbit.cancel_order(order["uuid"])
+                if order['side'] == 'bid':
+                    upbit.cancel_order(order["uuid"])
+                else:
+                    print("매도 주문 유지")
         else:
             pass
     except Exception as e:
@@ -576,7 +588,7 @@ def add_new_bid(key1, key2, coinn, bidprice, bidvol):
 
 
 def trace_trade_method(svrno):
-    global orderstat, key1, key2, coinn, askcnt, bidcnt, traded, seton, targetamt
+    global orderstat, key1, key2, coinn, askcnt, bidcnt, traded, seton, targetamt, pbidcnt
     setons = dbconn.getsetonsvr(svrno)  # 서버별 사용자 로드
     try:
         for seton in setons:  # 개별 프로세스 시작
@@ -592,20 +604,22 @@ def trace_trade_method(svrno):
                 interVal = myset[3]  # 매수 횟수
                 trset = myset[8]  # 투자 설정
                 holdpost = myset[11] # 홀드 포지션
-                if holdpost > 0:
+                if holdpost > 3:
                     if bidcount >= holdpost:
-                        dbconn.setholdYN(myset[0] ,'Y')  # 홀드 설정
+                        # dbconn.setholdYN(myset[0] ,'Y')  # 홀드 설정
+                        print("홀드 조건 해당")
                     else:
+                        print("홀드 조건 아님")
                         pass  #  dbconn.setholdYN(myset[0] ,'N')
                 else:
-                    print("홀드 안함")
+                    print("홀드 설정 아님")
                 print("매수 카운트 11 : ", bidcount)
                 print("홀드 포지션 11 : ", holdpost)
                 trsetting = loadtrset(trset)  # 투자 설정 로드
                 intergap = trsetting[:10]  # 매수 간격
-                print("매수간격 설정내용 :", intergap)
+                # print("매수간격 설정내용 :", intergap)
                 intRate = trsetting[10:20]  # 매수 이율
-                print("매수 이율 설정 내용 : ", intRate)
+                # print("매수 이율 설정 내용 : ", intRate)
                 coinn = myset[6]  # 매수 종목
                 cointrend = get_trend(coinn)  # 코인 트렌드 검색
                 coinsignal = dbconn.getSignal(coinn)[0]
@@ -667,6 +681,9 @@ def trace_trade_method(svrno):
                                     save_lastbuy()
                             else:
                                 print("딜레이신호등 작동중")
+                                if pbidcnt == 1:
+                                    add_new_bid(key1, key2, coinn, bidprice, bidvol)
+                                    save_lastbuy()
                                 pass
                         else:
                             print("신호등 부정", cointrend[1])
@@ -779,9 +796,11 @@ def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn):
                     cntpost = dblasset.index(cnt)+1
                 else:
                     cntpost = norasset.index(cnt)+1
-            print("매수 카운트 : ", cntpost)
+                if cnt == 0:
+                    cntpost = 0
+                print("매수단계 카운트 : ", cntpost)
     except Exception as e:
-        print("매도 카운트 에러", e)
+        print("매수단계 카운트 에러", e)
         cntpost = 0
     finally:
         return cntpost
