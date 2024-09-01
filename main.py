@@ -6,7 +6,6 @@ import dotenv
 import os
 import sys
 import requests
-import json
 
 
 dotenv.load_dotenv()
