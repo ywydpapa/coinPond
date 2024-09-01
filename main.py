@@ -110,7 +110,8 @@ def cancelaskorder(key1, key2, coinn):  # 매도 주문 취소
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = '매도주문취소 에러 '+str(e)
+        send_error(msg, uno)
         print('매도주문취소 에러', e)
 
 
@@ -129,7 +130,8 @@ def canclebidorder(key1, key2, coinn):  # 청산
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = '매수주문취소 에러 :'+ str(e)
+        send_error(msg, uno)
         print('매수주문취소 에러', e)
 
 
@@ -267,7 +269,8 @@ def order_cnt_trade(svrno):
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = '메인 루프 에러 :'+str(e)
+        send_error(msg, uno)
         print('level 1 Error :', e)
     finally:
         ntime = datetime.now()
@@ -290,7 +293,8 @@ def order_new_bid(key1, key2, coinn, initAsset, intval, intergap, profit):
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = '최초 구매 시작 에러 :'+str(e)
+        send_error(msg, uno)
         print(e)
     finally:
         print("1단계 매수내역 :", buyrest)
@@ -334,7 +338,8 @@ def order_new_bid2(key1, key2, coinn, initAsset, intval, intergap, profit):  #�
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = "시장가 구매 2 에러 "+ str(e)
+        send_error(msg, uno)
         print(e)
     finally:
         print("1단계 매수내역 :", buyrest)
@@ -382,7 +387,8 @@ def order_mod_ask(key1, key2, coinn, profit):  #이윤 고정식 계산 방식
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = "매도주문 갱신 에러 "+ str(e)
+        send_error(msg, uno)
         print('매도주문 갱신 에러 ', e)
     finally:
         print('매도주문 갱신')
@@ -411,7 +417,8 @@ def order_mod_ask2(key1, key2, coinn, profit):  #이윤 변동식 계산 방식
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = '매도주문2 갱신 에러 '+str(e)
+        send_error(msg, uno)
         print('매도주문2 갱신 에러 ', e)
     finally:
         print('매도주문2 갱신')
@@ -440,10 +447,11 @@ def order_mod_ask3(key1, key2, coinn, profit):  #분산형 매도주문 생성
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
-        print('매도주문 갱신 에러 ', e)
+        msg = '매도주문 갱신3 에러 '+str(e)
+        send_error(msg, uno)
+        print('매도주문 갱신3 에러 ', e)
     finally:
-        print('매도주문 갱신')
+        print('매도주문3 갱신')
         globals()['tcnt_{}'.format(seton[0])] = 3  # 구매 완료 설정
         # 새로운 주문 완료
     return None
@@ -468,7 +476,8 @@ def order_mod_ask5(key1, key2, coinn, profit):  #이윤 변동식 계산 방식
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = '매도주문5 갱신 에러 '+str(e)
+        send_error(msg, uno)
         print('매도주문5 갱신 에러 ', e)
     finally:
         print('매도주문5 갱신')
@@ -541,7 +550,8 @@ def get_trend(coinn):
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = "트렌드 체크 에러 "+str(e)
+        send_error(msg, uno)
         print("Trend check Error ", e)
     finally:
         return trend, opoint + cpoint + hpoint + lpoint, vpoint
@@ -560,7 +570,8 @@ def order_new_bid_mod(key1, key2, coinn, initAsset, intval, intergap, profit):
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = '시장가 구매 에러 '+ str(e)
+        send_error(msg, uno)
         print(e)
     finally:
         print("1단계 매수내역 :", buyrest)
@@ -622,7 +633,7 @@ def trace_trade_method(svrno):
                 # print("매수 이율 설정 내용 : ", intRate)
                 coinn = myset[6]  # 매수 종목
                 cointrend = get_trend(coinn)  # 코인 트렌드 검색
-                coinsignal = dbconn.getSignal(coinn)[0]
+                coinsignal = dbconn.getSignal(coinn) # 시간당 코인 트렌드 조회
                 print("트렌드 시그날 내용 : ",coinsignal)
                 orderstat = getorders(keys[0], keys[1], myset[6])  # 주문현황 조회
                 globals()['askcnt_{}'.format(seton[0])] = 0
@@ -636,14 +647,23 @@ def trace_trade_method(svrno):
                 print("매수요청 수 : ", globals()['bidcnt_{}'.format(seton[0])])  # 매수요청 수
                 traded = checktraded(keys[0], keys[1], coinn)  # 설정 코인 지갑내 존재 확인
                 print(traded)
-                if myset[10] == 'Y':
-                    print("홀드 중")
-                    canclebidorder(key1, key2, coinn) # 전체 매수 주문 취소
+                if myset[10] == 'Y': # 홀드 주문 취소 프로세스
+                    print("홀드 설정 사용중")
+                    if bidcount >= holdpost:
+                        # dbconn.setholdYN(myset[0] ,'Y')  # 홀드 설정
+                        dlytime = check_hold(60,myset[1])
+                        if dlytime != "SALE":
+                            canclebidorder(key1, key2, coinn)  # 전체 매수 주문 취소
+                            print("홀드 조건에 1시간 이내 매수주문 취소")
+                        print("홀드 조건 해당")
+                    else:
+                        print("홀드 조건 아님")
+                        pass  #  dbconn.setholdYN(myset[0] ,'N')
                 else:
-                    print("홀드 해제중")
+                    print("홀드 설정 해제중")
                 if traded == None: # 최초 거래 실시
                     order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate[1]) # 구간은 리스트로 이율은 상수로
-                    save_lastbuy()
+                    save_lastbuy(myset[1])
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
                     if float(traded["balance"]) > 0:
                         print("매도 수정 처리 1")
@@ -654,8 +674,9 @@ def trace_trade_method(svrno):
                         print("매수 주문 없음 check")
                         if cointrend[1] > -3:
                             print("신호등 긍정 ", cointrend[1])
-                            bidprice = float(pyupbit.get_current_price(coinn)) * 0.99
-                            bidprice = calprice(bidprice)
+                            apprate = intergap[bidcount+1] # 매수단계별 구간 적용
+                            bidprice = float(pyupbit.get_current_price(coinn)) * apprate # 현재가에 단계 구간 적용
+                            bidprice = calprice(bidprice) # 적용 가격 변환
                             print(bidprice)
                             totalamt = (float(traded["balance"]) + float(traded["locked"])) * float(traded["avg_buy_price"])
                             if myset[12] == "Y":
@@ -664,27 +685,27 @@ def trace_trade_method(svrno):
                             else:
                                 pbidcnt = bidcount
                                 targetamt = iniAsset * 2**pbidcnt
-                                print("구매단계 체크 : ", pbidcnt)
-                                print("주문 금액 체크 : ", targetamt)
-                            bidvol = targetamt / bidprice
+                            print("구매단계 체크 : ", pbidcnt)
+                            print("주문 금액 체크 : ", targetamt)
+                            bidvol = targetamt / bidprice #구매 수량 산출
                             print(bidvol)
                             # 일반 구매 시 딜레이 타임
                             if bidcount >= holdpost:
-                                dlytime = check_hold(60) #기본 딜레이 신호등
+                                dlytime = check_hold(60,myset[1]) #홀드 구매 딜레이 신호등
                             else:
-                                dlytime = check_hold(10) # 홀드 구매 시 딜레이타임
+                                dlytime = check_hold(10, myset[1]) # 기본 구매 딜레이 신호
                             if dlytime == "SALE":
                                 print("딜레이신호등 통과")
                                 if myset[10] == 'N':
                                     print("홀드 N으로 매수재주문")
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol)
-                                    save_lastbuy()
+                                    save_lastbuy(myset[1])
                             else:
                                 print("딜레이신호등 작동중")
                                 if pbidcnt == 1:
                                     print("초기 구매 작동")
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol)
-                                    save_lastbuy()
+                                    save_lastbuy(myset[1])
                                 pass
                         else:
                             print("신호등 부정", cointrend[1])
@@ -698,7 +719,8 @@ def trace_trade_method(svrno):
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = "메인 루프 에러 :"+str(e)
+        send_error(msg, uno)
         print("메인 루프 에러 :", e)
     finally:
         ntime = datetime.now()
@@ -730,60 +752,62 @@ def send_error(err, uno):
     dbconn.errlog(err, uno)
 
 
-def save_lastbuy():
-    data = {'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+def save_lastbuy(uno):
+    data = {'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),'userNo':uno}
     with open('pond.json', 'w') as f:
         json.dump(data, f)
     f.close()
 
 
-def save_jsonfile():
-    data = {'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+def save_jsonfile(uno):
+    data = {'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'userNo':uno}
     with open('pond.json', 'w') as f:
         json.dump(data, f)
     f.close()
 
 
-def save_holdtime():
-    data = {'lasthold': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+def save_holdtime(uno):
+    data = {'lasthold': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'userNo':uno}
     with open('pond.json', 'w') as f:
         json.dump(data, f)
     f.close()
 
 
-def check_hold(min):
+def check_hold(min,uno):
     now = datetime.now()
     with open("pond.json", "r") as f:
         data = json.load(f)
     last = data['lastbuy']
-    if last != None:
-        past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
-        diff = now - past
-        diffmin = diff.seconds / 60
-        if diffmin <= min:
-            return "HOLD"
-        else:
-            return "SALE"
+    if uno == data['userNo']:
+        if last != None:
+            past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+            diff = now - past
+            diffmin = diff.seconds / 60
+            if diffmin <= min:
+                return "HOLD"
+            else:
+                return "SALE"
     else:
-        save_lastbuy()  #구매 카운트 시작
+        save_lastbuy(uno)  #구매 카운트 시작
     f.close()
 
 
-def check_holdstart(min): # 홀드시작이후 시간 체크
+def check_holdstart(min,uno): # 홀드시작이후 시간 체크
     now = datetime.now()
     with open("pond.json", "r") as f:
         data = json.load(f)
     last = data['lasthold']
-    if last != None:
-        past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
-        diff = now - past
-        diffmin = diff.seconds / 60
-        if diffmin <= min:
-            return "HOLD"
-        else:
-            return "SALE"
+    if uno == data['userNo']:
+        if last != None:
+            past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+            diff = now - past
+            diffmin = diff.seconds / 60
+            if diffmin <= min:
+                return "HOLD"
+            else:
+                return "SALE"
     else:
-        save_holdtime()  #새로운 홀드 카운트 시작
+        save_holdtime(uno)  #새로운 홀드 카운트 시작
     f.close()
 
 
@@ -826,7 +850,7 @@ for seton in setons:
     globals()['mybuy_{}'.format(seton[0])] = 0  # 매수 단계 카운트
 
 service_start() # 시작시간 기록
-save_jsonfile()
+save_jsonfile(seton[0])
 while True:
     print("구동 횟수 : ", cnt)
     try:
@@ -839,7 +863,8 @@ while True:
     except Exception as e:
         myset = loadmyset(seton)
         uno = myset[1]
-        send_error(e, uno)
+        msg = "메인 while 반복문 에러 : "+str(e)
+        send_error(msg, uno)
         print(e)
     finally:
         time.sleep(1)
