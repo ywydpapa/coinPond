@@ -606,3 +606,39 @@ def getSignal(coinn):
         db31.close()
         return rows
 
+
+def tradelog(uno,type,coinn):
+    global rows
+    db32 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur32 = db32.cursor()
+    try:
+        sql = "update tradeLog set attrib = %s where userNo = %s and tradeType = %s"
+        cur32.execute(sql, ("UPD00UPD00UPD00", uno, type))
+        sql = "INSERT INTO tradeLog (userNo, tradeType, coinName) VALUES (%s, %s, %s)"
+        cur32.execute(sql,(uno, type, coinn))
+        db32.commit()
+    except Exception as e:
+        print('접속오류 트레이드 로그', e)
+    finally:
+        cur32.close()
+        db32.close()
+
+
+def getlog(uno,type):
+    global rows
+    db33= pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur33= db33.cursor()
+    try:
+        sql = "SELECT regDate FROM tradeLog where userNo = %s and attrib = %s and tradeType = %s"
+        cur33.execute(sql, (uno,'100001000010000' ,type))
+        rows = cur33.fetchone()
+        print(str(rows)[0])
+    except Exception as e:
+        print("트레이드 로그 조회 오류 ", e)
+    finally:
+        cur33.close()
+        db33.close()
+        return rows
+
+
+

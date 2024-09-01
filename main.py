@@ -12,7 +12,7 @@ import json
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240901001
+mainver = 240901002
 
 
 def loadmyset(uno):
@@ -752,63 +752,42 @@ def send_error(err, uno):
     dbconn.errlog(err, uno)
 
 
-def save_lastbuy(uno):
-    data = {'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),'userNo':uno}
-    with open('pond.json', 'w') as f:
-        json.dump(data, f)
-    f.close()
-
-
-def save_jsonfile(uno):
-    data = {'lastbuy': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'userNo':uno}
-    with open('pond.json', 'w') as f:
-        json.dump(data, f)
-    f.close()
+def save_lastbuy(uno,coinn):
+    dbconn.tradelog(uno,'BID',coinn)
 
 
 def save_holdtime(uno):
-    data = {'lasthold': datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'userNo':uno}
-    with open('pond.json', 'w') as f:
-        json.dump(data, f)
-    f.close()
+    dbconn.tradelog(uno,'HOLD','NONE')
 
 
 def check_hold(min,uno):
     now = datetime.now()
-    with open("pond.json", "r") as f:
-        data = json.load(f)
-    last = data['lastbuy']
-    if uno == data['userNo']:
-        if last != None:
-            past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
-            diff = now - past
-            diffmin = diff.seconds / 60
-            if diffmin <= min:
-                return "HOLD"
-            else:
-                return "SALE"
+    last = dbconn.getlog(uno,'HOLD')
+    if last != None:
+        past = datetime.strptime(last[0], "%Y-%m-%d %H:%M:%S")
+        diff = now - past
+        diffmin = diff.seconds / 60
+        if diffmin <= min:
+            return "HOLD"
+        else:
+            return "SALE"
     else:
-        save_lastbuy(uno)  #구매 카운트 시작
-    f.close()
+        dbconn.tradelog(uno,'HOLD','NONE')  #구매 카운트 시작
 
 
 def check_holdstart(min,uno): # 홀드시작이후 시간 체크
     now = datetime.now()
-    with open("pond.json", "r") as f:
-        data = json.load(f)
-    last = data['lasthold']
-    if uno == data['userNo']:
-        if last != None:
-            past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
-            diff = now - past
-            diffmin = diff.seconds / 60
-            if diffmin <= min:
-                return "HOLD"
-            else:
-                return "SALE"
+    last = dbconn.getlog(uno,'HOLD')
+    if last != None:
+        past = datetime.strptime(last[0], "%Y-%m-%d %H:%M:%S")
+        diff = now - past
+        diffmin = diff.seconds / 60
+        if diffmin <= min:
+            return "HOLD"
+        else:
+            return "SALE"
     else:
         save_holdtime(uno)  #새로운 홀드 카운트 시작
-    f.close()
 
 
 def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn):
@@ -850,7 +829,7 @@ for seton in setons:
     globals()['mybuy_{}'.format(seton[0])] = 0  # 매수 단계 카운트
 
 service_start() # 시작시간 기록
-save_jsonfile(seton[0])
+
 while True:
     print("구동 횟수 : ", cnt)
     try:
