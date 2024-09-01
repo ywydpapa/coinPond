@@ -626,13 +626,13 @@ def tradelog(uno,type,coinn,tstamp):
         db32.close()
 
 
-def getlog(uno,type):
+def getlog(uno,type,coinn):
     global rows
     db33= pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur33= db33.cursor()
     try:
-        sql = "SELECT regDate FROM tradeLog where userNo = %s and attrib = %s and tradeType = %s"
-        cur33.execute(sql, (uno,'100001000010000' ,type))
+        sql = "SELECT regDate FROM tradeLog where userNo = %s and attrib = %s and tradeType = %s and coinName = %s"
+        cur33.execute(sql, (uno,'100001000010000' ,type, coinn))
         rows = cur33.fetchone()
     except Exception as e:
         print("트레이드 로그 조회 오류 ", e)

@@ -11,7 +11,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240901002
+mainver = 240901019
 
 
 def loadmyset(uno):
@@ -615,7 +615,7 @@ def trace_trade_method(svrno):
                 interVal = myset[3]  # 매수 횟수
                 trset = myset[8]  # 투자 설정
                 holdpost = myset[11] # 홀드 포지션
-                if holdpost > 3:
+                if holdpost > 2:
                     if bidcount >= holdpost:
                         # dbconn.setholdYN(myset[0] ,'Y')  # 홀드 설정
                         print("홀드 조건 해당")
@@ -651,7 +651,7 @@ def trace_trade_method(svrno):
                     print("홀드 설정 사용중")
                     if bidcount >= holdpost:
                         # dbconn.setholdYN(myset[0] ,'Y')  # 홀드 설정
-                        dlytime = check_hold(60,myset[1])
+                        dlytime = check_hold(60,myset[1],coinn)
                         if dlytime != "SALE":
                             canclebidorder(key1, key2, coinn)  # 전체 매수 주문 취소
                             print("홀드 조건에 1시간 이내 매수주문 취소")
@@ -660,7 +660,7 @@ def trace_trade_method(svrno):
                         print("홀드 조건 아님")
                         pass  #  dbconn.setholdYN(myset[0] ,'N')
                 else:
-                    print("홀드 설정 해제중")
+                    print("홀드 설정 미사용")
                 if traded == None: # 최초 거래 실시
                     order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate[1]) # 구간은 리스트로 이율은 상수로
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
@@ -670,7 +670,7 @@ def trace_trade_method(svrno):
                         print(bidcount," 단계 이율 적용 : ", inrate)
                         order_mod_ask5(key1, key2, coinn, inrate)  # 매도 수정 처리
                     elif globals()['bidcnt_{}'.format(seton[0])] == 0:  # 매수주문 없음
-                        print("매수 주문 없음 check")
+                        print("매수 주문 없음 check 추가 매수 프로세스")
                         if cointrend[1] > -3:
                             print("신호등 긍정 ", cointrend[1])
                             apprate = intergap[bidcount+1] # 매수단계별 구간 적용
@@ -688,11 +688,13 @@ def trace_trade_method(svrno):
                             print("주문 금액 체크 : ", targetamt)
                             bidvol = targetamt / bidprice #구매 수량 산출
                             print(bidvol)
+                            prevbid = get_lastbuy(key1, key2, coinn, myset[1])
+                            print("직전 구매 시간",prevbid)
                             # 일반 구매 시 딜레이 타임
                             if bidcount >= holdpost:
-                                dlytime = check_hold(60,myset[1]) #홀드 구매 딜레이 신호등
+                                dlytime = check_hold(60,myset[1],coinn) #홀드 구매 딜레이 신호등
                             else:
-                                dlytime = check_hold(10, myset[1]) # 기본 구매 딜레이 신호
+                                dlytime = check_hold(10, myset[1], coinn) # 기본 구매 딜레이 신호
                             if dlytime == "SALE":
                                 print("딜레이신호등 통과")
                                 if myset[10] == 'N':
@@ -700,19 +702,20 @@ def trace_trade_method(svrno):
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol)
                             else:
                                 print("딜레이신호등 작동중")
-                                if pbidcnt == 1:
-                                    print("초기 구매 작동")
+                                if pbidcnt in[1,2,3,4]:
+                                    print("초기 구매 딜레이 없이 작동")
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol)
                                 pass
                         else:
                             print("신호등 부정", cointrend[1])
                             pass  # 대기
+                        print(get_lasttrade(key1, key2, coinn, myset[1]))
                     else:
                         print("매도 대기중")
                         pass
             else:
                 print("User ", myset[1], 'Status is Off')
-            check_lastbuy(key1, key2, coinn, myset[1])
+            get_lastbuy(key1, key2, coinn, myset[1])
             print("User ", myset[1], " ", myset[6], " finish")
     except Exception as e:
         myset = loadmyset(seton)
@@ -750,11 +753,11 @@ def send_error(err, uno):
     dbconn.errlog(err, uno)
 
 
-def check_lastbuy(key1, key2, coinn, uno):
+def get_lastbuy(key1, key2, coinn, uno):
     upbit = pyupbit.Upbit(key1, key2)
     orders = upbit.get_order(coinn, state='wait')
-    lastbuy = dbconn.getlog(uno,'BID')[0]
-    for order in orders:
+    lastbuy = dbconn.getlog(uno,'BID', coinn)[0]
+    for order in orders: # 내용이 있을 경우 업데이트
         if order["side"] == 'bid':
             last = order["created_at"]
             last = last.replace("T", " ")
@@ -764,16 +767,52 @@ def check_lastbuy(key1, key2, coinn, uno):
                 dbconn.tradelog(uno,"BID",coinn, last)
             else:
                 pass
-            return last
+    lastbid = dbconn.getlog(uno,'BID', coinn)[0]
+    return lastbid
 
 
-def save_holdtime(uno):
-    dbconn.tradelog(uno,'HOLD','NONE')
+def get_lasttrade(key1, key2, coinn, uno):
+    upbit = pyupbit.Upbit(key1, key2)
+    orders = upbit.get_order(coinn, state='done',limit=1)
+    lasthold = dbconn.getlog(uno,'HOLD', coinn)[0]
+    for order in orders:
+        if order["side"] == 'bid':
+            last = order["created_at"]
+            last = last.replace("T", " ")
+            last = last[:-6]
+            last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+            if last != lasthold:
+                dbconn.tradelog(uno,"HOLD",coinn, last)
+            else:
+                pass
+    lasthold = dbconn.getlog(uno,'HOLD', coinn)[0]
+    return lasthold
 
 
-def check_hold(min,uno):
+def chk_lastbid(coinn, uno, restmin):
     now = datetime.now()
-    last = dbconn.getlog(uno,'HOLD')
+    lastbid = dbconn.getlog(uno,'BID', coinn)
+    lastbid = str(lastbid[0])
+    if lastbid != None:
+        past = datetime.strptime(lastbid, "%Y-%m-%d %H:%M:%S")
+        diff = now - past
+        diffmin = diff.seconds / 60
+        print("구매 경과 시간 :", diffmin, "분")
+        if diffmin <= restmin:
+            return "DELAY"
+        else:
+            return "BID"
+    else:
+        print("직정 구매 이력 없음")
+
+
+def save_holdtime(uno,coinn):
+    dbconn.tradelog(uno,'HOLD',coinn)
+
+
+def check_hold(min,uno,coinn):
+    now = datetime.now()
+    last = dbconn.getlog(uno,'HOLD',coinn)
     last = str(last[0])
     if last != None:
         past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
@@ -785,12 +824,12 @@ def check_hold(min,uno):
         else:
             return "SALE"
     else:
-        dbconn.tradelog(uno,'HOLD','NONE')  #구매 카운트 시작
+        dbconn.tradelog(uno,'HOLD',coinn)  #구매 카운트 시작
 
 
-def check_holdstart(min,uno): # 홀드시작이후 시간 체크
+def check_holdstart(min,uno,coinn): # 홀드시작이후 시간 체크
     now = datetime.now()
-    last = dbconn.getlog(uno,'HOLD')
+    last = dbconn.getlog(uno,'HOLD', coinn)
     last = str(last[0])
     if last != None:
         past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
@@ -801,7 +840,7 @@ def check_holdstart(min,uno): # 홀드시작이후 시간 체크
         else:
             return "SALE"
     else:
-        save_holdtime(uno)  #새로운 홀드 카운트 시작
+        save_holdtime(uno, coinn)  #새로운 홀드 카운트 시작
 
 
 def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn):
