@@ -607,15 +607,17 @@ def getSignal(coinn):
         return rows
 
 
-def tradelog(uno,type,coinn):
+def tradelog(uno,type,coinn,tstamp):
     global rows
     db32 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur32 = db32.cursor()
     try:
+        if tstamp == "":
+            tstamp = datetime.now()
         sql = "update tradeLog set attrib = %s where userNo = %s and tradeType = %s"
         cur32.execute(sql, ("UPD00UPD00UPD00", uno, type))
-        sql = "INSERT INTO tradeLog (userNo, tradeType, coinName) VALUES (%s, %s, %s)"
-        cur32.execute(sql,(uno, type, coinn))
+        sql = "INSERT INTO tradeLog (userNo, tradeType, coinName, regDate) VALUES (%s, %s, %s, %s)"
+        cur32.execute(sql,(uno, type, coinn, tstamp))
         db32.commit()
     except Exception as e:
         print('접속오류 트레이드 로그', e)
@@ -632,7 +634,6 @@ def getlog(uno,type):
         sql = "SELECT regDate FROM tradeLog where userNo = %s and attrib = %s and tradeType = %s"
         cur33.execute(sql, (uno,'100001000010000' ,type))
         rows = cur33.fetchone()
-        print(str(rows)[0])
     except Exception as e:
         print("트레이드 로그 조회 오류 ", e)
     finally:

@@ -593,8 +593,9 @@ def order_new_bid_mod(key1, key2, coinn, initAsset, intval, intergap, profit):
 
 
 def add_new_bid(key1, key2, coinn, bidprice, bidvol):
-    buylimitpr(key1, key2, coinn, bidprice, bidvol)
-    print("추가 매수 실행")
+    ret = buylimitpr(key1, key2, coinn, bidprice, bidvol)
+    time.sleep(1)
+    return ret
 
 
 def trace_trade_method(svrno):
@@ -662,7 +663,6 @@ def trace_trade_method(svrno):
                     print("홀드 설정 해제중")
                 if traded == None: # 최초 거래 실시
                     order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate[1]) # 구간은 리스트로 이율은 상수로
-                    save_lastbuy(myset[1])
                 elif float(traded["balance"]) + float(traded["locked"]) > 0:
                     if float(traded["balance"]) > 0:
                         print("매도 수정 처리 1")
@@ -698,13 +698,11 @@ def trace_trade_method(svrno):
                                 if myset[10] == 'N':
                                     print("홀드 N으로 매수재주문")
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol)
-                                    save_lastbuy(myset[1])
                             else:
                                 print("딜레이신호등 작동중")
                                 if pbidcnt == 1:
                                     print("초기 구매 작동")
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol)
-                                    save_lastbuy(myset[1])
                                 pass
                         else:
                             print("신호등 부정", cointrend[1])
@@ -714,6 +712,7 @@ def trace_trade_method(svrno):
                         pass
             else:
                 print("User ", myset[1], 'Status is Off')
+            check_lastbuy(key1, key2, coinn, myset[1])
             print("User ", myset[1], " ", myset[6], " finish")
     except Exception as e:
         myset = loadmyset(seton)
@@ -751,8 +750,21 @@ def send_error(err, uno):
     dbconn.errlog(err, uno)
 
 
-def save_lastbuy(uno,coinn):
-    dbconn.tradelog(uno,'BID',coinn)
+def check_lastbuy(key1, key2, coinn, uno):
+    upbit = pyupbit.Upbit(key1, key2)
+    orders = upbit.get_order(coinn, state='wait')
+    lastbuy = dbconn.getlog(uno,'BID')[0]
+    for order in orders:
+        if order["side"] == 'bid':
+            last = order["created_at"]
+            last = last.replace("T", " ")
+            last = last[:-6]
+            last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+            if last != lastbuy:
+                dbconn.tradelog(uno,"BID",coinn, last)
+            else:
+                pass
+            return last
 
 
 def save_holdtime(uno):
@@ -762,10 +774,12 @@ def save_holdtime(uno):
 def check_hold(min,uno):
     now = datetime.now()
     last = dbconn.getlog(uno,'HOLD')
+    last = str(last[0])
     if last != None:
-        past = datetime.strptime(last[0], "%Y-%m-%d %H:%M:%S")
+        past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
         diff = now - past
         diffmin = diff.seconds / 60
+        print("경과시간 : ", diffmin,"분")
         if diffmin <= min:
             return "HOLD"
         else:
@@ -777,8 +791,9 @@ def check_hold(min,uno):
 def check_holdstart(min,uno): # 홀드시작이후 시간 체크
     now = datetime.now()
     last = dbconn.getlog(uno,'HOLD')
+    last = str(last[0])
     if last != None:
-        past = datetime.strptime(last[0], "%Y-%m-%d %H:%M:%S")
+        past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
         diff = now - past
         diffmin = diff.seconds / 60
         if diffmin <= min:
@@ -799,9 +814,9 @@ def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn):
         for order in orders:
             if order['side'] == 'ask':
                 amt = float(order['volume']) * float(order['price'])
-                print(amt)
+                #print(amt)
                 cnt = round(amt/float(iniAsset))
-                print(cnt)
+                #print(cnt)
                 if dblyn == 'Y':
                     cntpost = dblasset.index(cnt)+1
                 else:
@@ -845,4 +860,4 @@ while True:
         send_error(msg, uno)
         print(e)
     finally:
-        time.sleep(1)
+        time.sleep(2)
