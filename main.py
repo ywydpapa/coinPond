@@ -472,21 +472,25 @@ def trace_trade_method(svrno):
                         print("매수 주문 없음 check 추가 매수 프로세스")
                         if cointrend[1] > -3:
                             print("신호등 긍정 ", cointrend[1])
-                            apprate = intergap[bidcount+1] # 매수단계별 구간 적용
-                            bidprice = float(pyupbit.get_current_price(coinn)) * apprate # 현재가에 단계 구간 적용
+                            apprate = float(intergap[bidcount])/100 # 매수단계별 구간 적용
+                            print("매수 단계 :",bidcount,"적용 비율 ",apprate)
+                            if bidcount >= holdpost:  # 홀드 구간
+                                bidprice = float(pyupbit.get_current_price(coinn)) * (1-float(apprate)*1.2) # 현재가에 단계 구간 적용(120% 구간 적용)
+                            else:
+                                bidprice = float(pyupbit.get_current_price(coinn)) * (1-float(apprate))  # 현재가에 단계 구간 적용
                             bidprice = calprice(bidprice, myset[1]) # 적용 가격 변환
-                            print(bidprice)
+                            print("적용 가격: ", bidprice)
                             totalamt = (float(traded["balance"]) + float(traded["locked"])) * float(traded["avg_buy_price"])
                             if myset[12] == "Y":
                                 targetamt = round(totalamt * 2) # 구매가의 2배 구매
                                 print(targetamt)
                             else:
                                 pbidcnt = bidcount
-                                targetamt = iniAsset * 2**pbidcnt
+                                targetamt = iniAsset*2**pbidcnt
                             print("구매단계 체크 : ", pbidcnt)
                             print("주문 금액 체크 : ", targetamt)
                             bidvol = targetamt / bidprice #구매 수량 산출
-                            print(bidvol)
+                            print("주문 수량 산출 : ",bidvol)
                             prevbid = get_lastbuy(key1, key2, coinn, myset[1])
                             print("직전 구매 시간",prevbid)
                             # 일반 구매 시 딜레이 타임
@@ -496,8 +500,11 @@ def trace_trade_method(svrno):
                                 dlytime = check_hold(10, myset[1], coinn) # 기본 구매 딜레이 신호
                             if dlytime == "SALE":
                                 print("딜레이신호등 통과")
-                                if myset[10] == 'N':
-                                    print("홀드 N으로 매수재주문")
+                                if bidcount >= holdpost:  #홀드 구간 비율 상승 재주문
+                                    print("홀드 구간 매수재주문")
+                                    add_new_bid(key1, key2, coinn, bidprice, bidvol, myset[1])
+                                else:
+                                    print("일반 구간 매수재주문")
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol, myset[1])
                             else:
                                 print("딜레이신호등 작동중")
@@ -645,16 +652,16 @@ def check_holdstart(min,uno,coinn): # 홀드시작이후 시간 체크
 def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn, uno):
     global cntpost
     try:
-        cntpost = 0
+        cntpost = 1
         orders = getorders(ckey1, ckey2, coinn, uno)
         norasset = [1,3,7,15,31,63,127,255,511,1023]
         dblasset = [1,3,9,27,81,243,729,2187,6561,19683]
         for order in orders:
             if order['side'] == 'ask':
                 amt = float(order['volume']) * float(order['price'])
-                #print(amt)
+                print("기존 투입 금액 ",amt)
                 cnt = round(amt/float(iniAsset))
-                #print(cnt)
+                print("산출 배수 ",cnt)
                 if dblyn != 'Y':
                     if cnt not in norasset: # 목록에 없을 경우
                         for i in norasset:
@@ -669,8 +676,7 @@ def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn, uno):
                                 cntpost += 1
                     else:
                         cntpost = dblasset.index(cnt) + 1
-                if cnt == 0:
-                    cntpost = 0
+                print("산출 회차 ", cntpost)
     except Exception as e:
         msg = "매수단계 카운트 에러" + str(e)
         send_error(msg, uno)
