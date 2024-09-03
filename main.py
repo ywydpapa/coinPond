@@ -11,7 +11,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240901019
+mainver = 240903001
 
 
 def loadmyset(uno):
@@ -856,10 +856,20 @@ def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn):
                 #print(amt)
                 cnt = round(amt/float(iniAsset))
                 #print(cnt)
-                if dblyn == 'Y':
-                    cntpost = dblasset.index(cnt)+1
+                if dblyn != 'Y':
+                    if cnt not in norasset: # 목록에 없을 경우
+                        for i in norasset:
+                            if cnt > i:
+                                cntpost += 1
+                    else:
+                        cntpost = norasset.index(cnt) + 1
                 else:
-                    cntpost = norasset.index(cnt)+1
+                    if cnt not in dblasset:
+                        for i in dblasset:
+                            if cnt > i:
+                                cntpost += 1
+                    else:
+                        cntpost = dblasset.index(cnt) + 1
                 if cnt == 0:
                     cntpost = 0
                 print("매수단계 카운트 : ", cntpost)
@@ -883,6 +893,7 @@ for seton in setons:
 
 service_start() # 시작시간 기록
 
+
 while True:
     print("구동 횟수 : ", cnt)
     try:
@@ -900,3 +911,5 @@ while True:
         print(e)
     finally:
         time.sleep(2)
+
+
