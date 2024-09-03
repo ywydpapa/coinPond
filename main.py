@@ -521,7 +521,7 @@ def trace_trade_method(svrno):
                         pass
             else:
                 print("User ", myset[1], 'Status is Off')
-            get_lastbuy(key1, key2, coinn, myset[1])
+            #get_lastbuy(key1, key2, coinn, myset[1])
             print("User ", myset[1], " ", myset[6], " finish")
     except Exception as e:
         myset = loadmyset(seton)
