@@ -410,9 +410,11 @@ def trace_trade_method(svrno):
             print("User ", myset[1], "Coin ", myset[6], " seed ", myset[2], " start")
             bidcount = cntbid(key1, key2, myset[6], myset[2], myset[12], myset[1])  # 매수 단계 확인
             ckhld = get_lasttrade(key1, key2, myset[6], myset[1])
+            print(ckhld)
             if ckhld == None:
                 dbconn.tradelog(myset[1], 'HOLD', myset[6], datetime.now())
             chklstb = get_lastbuy(key1, key2,myset[6],myset[1])
+            print(chklstb)
             if chklstb == None:
                 dbconn.tradelog(myset[1], 'BID', myset[6], datetime.now())
             if myset[7] == 'Y':  # 주문 ON 인 경우
