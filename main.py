@@ -11,7 +11,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240903001
+mainver = 240904001
 
 
 def loadmyset(uno):
@@ -482,6 +482,7 @@ def trace_trade_method(svrno):
                             print("적용 가격: ", bidprice)
                             totalamt = (float(traded["balance"]) + float(traded["locked"])) * float(traded["avg_buy_price"])
                             if myset[12] == "Y":
+                                pbidcnt = bidcount
                                 targetamt = round(totalamt * 2) # 구매가의 2배 구매
                                 print(targetamt)
                             else:
@@ -563,6 +564,8 @@ def get_lastbuy(key1, key2, coinn, uno):
     upbit = pyupbit.Upbit(key1, key2)
     orders = upbit.get_order(coinn, state='wait')
     lastbuy = dbconn.getlog(uno,'BID', coinn)[0]
+    if lastbuy ==None :
+        lastbuy = datetime.now()
     for order in orders: # 내용이 있을 경우 업데이트
         if order["side"] == 'bid':
             last = order["created_at"]
@@ -609,7 +612,7 @@ def chk_lastbid(coinn, uno, restmin):
         else:
             return "BID"
     else:
-        print("직정 구매 이력 없음")
+        print("직전 구매 이력 없음")
 
 
 def save_holdtime(uno,coinn):
