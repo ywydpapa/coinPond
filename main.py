@@ -572,47 +572,57 @@ def send_error(err, uno):
 
 
 def get_lastbuy(key1, key2, coinn, uno):
-    upbit = pyupbit.Upbit(key1, key2)
-    orders = upbit.get_order(coinn, state='wait')
-    lastbuy = dbconn.getlog(uno,'BID', coinn)[0]
-    if lastbuy ==None :
-        lastbuy = datetime.now()
-    for order in orders: # 내용이 있을 경우 업데이트
-        if order["side"] == 'bid':
-            last = order["created_at"]
-            last = last.replace("T", " ")
-            last = last[:-6]
-            last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
-            if last != lastbuy:
-                dbconn.tradelog(uno,"BID",coinn, last)
-            else:
-                pass
-    lastbid = dbconn.getlog(uno,'BID', coinn)[0]
-    return lastbid
+    global lastbuy
+    try:
+        upbit = pyupbit.Upbit(key1, key2)
+        orders = upbit.get_order(coinn, state='wait')
+        lastbuy = dbconn.getlog(uno,'BID', coinn)
+        if lastbuy is None :
+            lastbuy = datetime.now()
+        for order in orders: # 내용이 있을 경우 업데이트
+            if order["side"] == 'bid':
+                last = order["created_at"]
+                last = last.replace("T", " ")
+                last = last[:-6]
+                last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+                if last != lastbuy:
+                    dbconn.tradelog(uno,"BID",coinn, last)
+                    lastbuy = dbconn.getlog(uno,'BID', coinn)
+    except Exception as e:
+        msg = "최근 거래 조회 에러 : " + str(e)
+        send_error(msg,uno)
+    finally:
+        return lastbuy
 
 
 def get_lasttrade(key1, key2, coinn, uno):
-    upbit = pyupbit.Upbit(key1, key2)
-    orders = upbit.get_order(coinn, state='done',limit=1)
-    lasthold = dbconn.getlog(uno,'HOLD', coinn)[0]
-    for order in orders:
-        if order["side"] == 'bid':
-            last = order["created_at"]
-            last = last.replace("T", " ")
-            last = last[:-6]
-            last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
-            if last != lasthold:
-                dbconn.tradelog(uno,"HOLD",coinn, last)
-            else:
-                pass
-    lasthold = dbconn.getlog(uno,'HOLD', coinn)[0]
-    return lasthold
+    global lasthold
+    try:
+        upbit = pyupbit.Upbit(key1, key2)
+        orders = upbit.get_order(coinn, state='done',limit=1)
+        lasthold = dbconn.getlog(uno,'HOLD', coinn)
+        if lasthold is None :
+            lasthold = datetime.now()
+        for order in orders:
+            if order["side"] == 'bid':
+                last = order["created_at"]
+                last = last.replace("T", " ")
+                last = last[:-6]
+                last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+                if last != lasthold:
+                    dbconn.tradelog(uno,"HOLD",coinn, last)
+    except Exception as e:
+        msg = "최종 거래 점검 에러 : " + str(e)
+        send_error(msg,uno)
+    finally:
+        lasthold = dbconn.getlog(uno, 'HOLD', coinn)[0]
+        return lasthold
 
 
 def chk_lastbid(coinn, uno, restmin):
     now = datetime.now()
-    lastbid = dbconn.getlog(uno,'BID', coinn)
-    lastbid = str(lastbid[0])
+    lastbid = dbconn.getlog(uno,'BID', coinn)[0]
+    lastbid = str(lastbid)
     if lastbid != None:
         past = datetime.strptime(lastbid, "%Y-%m-%d %H:%M:%S")
         diff = now - past
@@ -632,8 +642,8 @@ def save_holdtime(uno,coinn):
 
 def check_hold(min,uno,coinn):
     now = datetime.now()
-    last = dbconn.getlog(uno,'HOLD',coinn)
-    last = str(last[0])
+    last = dbconn.getlog(uno,'HOLD',coinn)[0]
+    last = str(last)
     if last != None:
         past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
         diff = now - past
@@ -649,8 +659,8 @@ def check_hold(min,uno,coinn):
 
 def check_holdstart(min,uno,coinn): # 홀드시작이후 시간 체크
     now = datetime.now()
-    last = dbconn.getlog(uno,'HOLD', coinn)
-    last = str(last[0])
+    last = dbconn.getlog(uno,'HOLD', coinn)[0]
+    last = str(last)
     if last != None:
         past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
         diff = now - past

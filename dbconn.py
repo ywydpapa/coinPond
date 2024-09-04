@@ -283,8 +283,8 @@ def tradelog(uno,type,coinn,tstamp):
     try:
         if tstamp == "":
             tstamp = datetime.now()
-        sql = "update tradeLog set attrib = %s where userNo = %s and tradeType = %s"
-        cur32.execute(sql, ("UPD00UPD00UPD00", uno, type))
+        sql = "update tradeLog set attrib = %s where userNo = %s and tradeType = %s and coinName = %s"
+        cur32.execute(sql, ("UPD00UPD00UPD00", uno, type, coinn))
         sql = "INSERT INTO tradeLog (userNo, tradeType, coinName, regDate) VALUES (%s, %s, %s, %s)"
         cur32.execute(sql,(uno, type, coinn, tstamp))
         db32.commit()
