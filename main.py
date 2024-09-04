@@ -7,11 +7,12 @@ import os
 import sys
 import requests
 
+from dbconn import tradelog
 
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 240904001
+mainver = 240904002
 
 
 def loadmyset(uno):
@@ -391,6 +392,7 @@ def order_new_bid_mod(key1, key2, coinn, initAsset, intval, intergap, profit, un
 def add_new_bid(key1, key2, coinn, bidprice, bidvol, uno):
     try:
         ret = buylimitpr(key1, key2, coinn, bidprice, bidvol, uno)
+        tradelog(uno,"BID", coinn, datetime.now()) #주문 기록
         return ret
     except Exception as e:
         msg = "추가매수 진행 에러 "+str(e)
@@ -410,11 +412,11 @@ def trace_trade_method(svrno):
             print("User ", myset[1], "Coin ", myset[6], " seed ", myset[2], " start")
             bidcount = cntbid(key1, key2, myset[6], myset[2], myset[12], myset[1])  # 매수 단계 확인
             ckhld = get_lasttrade(key1, key2, myset[6], myset[1])
-            print(ckhld)
+            print("Last HOLD : ",ckhld)
             if ckhld == None:
                 dbconn.tradelog(myset[1], 'HOLD', myset[6], datetime.now())
             chklstb = get_lastbuy(key1, key2,myset[6],myset[1])
-            print(chklstb)
+            print('Last BID : ',chklstb)
             if chklstb == None:
                 dbconn.tradelog(myset[1], 'BID', myset[6], datetime.now())
             if myset[7] == 'Y':  # 주문 ON 인 경우
@@ -492,10 +494,11 @@ def trace_trade_method(svrno):
                             if myset[12] == "Y":
                                 pbidcnt = bidcount
                                 targetamt = round(totalamt * 2) # 구매가의 2배 구매
-                                print(targetamt)
+                                print("구매금액 : ",targetamt)
                             else:
                                 pbidcnt = bidcount
                                 targetamt = iniAsset*2**pbidcnt
+                                print("구매금액 : ",targetamt)
                             print("구매단계 체크 : ", pbidcnt)
                             print("주문 금액 체크 : ", targetamt)
                             bidvol = targetamt / bidprice #구매 수량 산출
@@ -506,7 +509,7 @@ def trace_trade_method(svrno):
                             if bidcount >= holdpost:
                                 dlytime = check_hold(60,myset[1],coinn) #홀드 구매 딜레이 신호등
                             else:
-                                dlytime = check_hold(10, myset[1], coinn) # 기본 구매 딜레이 신호
+                                dlytime = chk_lastbid(coinn, myset[1], 3) # 기본 구매 딜레이 신호
                             if dlytime == "SALE":
                                 print("딜레이신호등 통과")
                                 if bidcount >= holdpost:  #홀드 구간 비율 상승 재주문
@@ -516,7 +519,7 @@ def trace_trade_method(svrno):
                                     print("일반 구간 매수재주문")
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol, myset[1])
                             else:
-                                print("딜레이신호등 작동중")
+                                print("딜레이신호등 작동중 (",dlytime,")")
                                 if pbidcnt in[1,2,3,4]:
                                     print("초기 구매 딜레이 없이 작동")
                                     add_new_bid(key1, key2, coinn, bidprice, bidvol, myset[1])
@@ -618,7 +621,7 @@ def chk_lastbid(coinn, uno, restmin):
         if diffmin <= restmin:
             return "DELAY"
         else:
-            return "BID"
+            return "SALE"
     else:
         print("직전 구매 이력 없음")
 
