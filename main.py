@@ -480,7 +480,7 @@ def trace_trade_method(svrno):
                         order_mod_ask5(key1, key2, coinn, inrate, myset[1])  # 매도 수정 처리
                     elif globals()['bidcnt_{}'.format(seton[0])] == 0:  # 매수주문 없음
                         print("매수 주문 없음 check 추가 매수 프로세스")
-                        if cointrend[1] > -3:
+                        if cointrend[1] > -12:
                             print("신호등 긍정 ", cointrend[1])
                             apprate = float(intergap[bidcount])/100 # 매수단계별 구간 적용
                             print("매수 단계 :",bidcount,"적용 비율 ",apprate)
