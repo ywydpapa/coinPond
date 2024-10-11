@@ -112,6 +112,7 @@ def get_trend4h(coinn):
 
 
 def get_trendnew(coinn):
+    global trendresult
     opoint4h, cpoint4h, hpoint4h, lpoint4h, vpoint4h = 0, 0, 0, 0, 0
     trend4h = []
     try:
@@ -123,20 +124,22 @@ def get_trendnew(coinn):
         highpr4h = candls4h[0]['high'].tolist()
         lowpr4h = candls4h[0]['low'].tolist()
         volumepr4h = candls4h[0]['volume'].tolist()
-        opric4h, cpric4h, hpric4h, lpric4h, volic4h = [], [], [], [], []
+        opric4h, cpric4h, hpric4h, lpric4h, volic4h, trendresult = [], [], [], [], [], []
         print(openpr4h)
         print(closepr4h)
-        for i in range(0, 9):
-            gap = closepr4h[i] - openpr4h[i]
-            avg = (closepr4h[i] + openpr4h[i])/2
-            grate = round(gap/avg*100, 3)
-            print(gap, grate)
+        for i in range(0, 10):
+            gap = round((closepr4h[i]-openpr4h[i]),2)
+            avg = round((closepr4h[i] + openpr4h[i])/2, 2)
+            grate = round(gap/avg*100, 2)
+            print(i,":",gap,avg ,grate)
+            trendresult.append(grate)
+        trendresult.reverse()
 
     except Exception as e:
         print("Trend4h check Error ", e)
     finally:
-        return None
+        return trendresult
 
 
-trend = get_trendnew("KRW-XRP")
+trend = get_trendnew("KRW-ZETA")
 print(trend)
