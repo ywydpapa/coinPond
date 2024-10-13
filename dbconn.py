@@ -311,4 +311,41 @@ def getlog(uno,type,coinn):
         return rows
 
 
+def modifyLog(uuid,stat):
+    global rows
+    db34 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur34 = db34.cursor()
+    try:
+        sql = "UPDATE tradeLogDetail set attrib = %s where uuid = %s"
+        if stat == "canceled":
+            stat = "CANC0CANC0CANC0"
+        elif stat == "confirmed":
+            stat = "CONF0CONF0CONF0"
+        else:
+            stat = "UPD00UPD00UPD00"
+        cur34.execute(sql, (stat,uuid))
+        db34.commit()
+    except Exception as e:
+        print('거래 기록 업데이트 에러',e)
+    finally:
+        cur34.close()
+        db34.close()
+
+
+def insertLog(uno,ldata01,ldata02,ldata03,ldata04,ldata05,ldata06,ldata07,ldata08,ldata09,ldata10,ldata11,ldata12,ldata13,ldata14,ldata15,ldata16):
+    global rows
+    db35 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur35 = db35.cursor()
+    try:
+        sql = ("insert into tradeLogDetail (userNo,orderDate,uuid,side,ord_type,price,market,created_at,volume,remaining_volume,reserved_fee,paid_fee,locked,executed_volume,excuted_funds,trades_count,time_in_force)"
+               " values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)")
+        cur35.execute(sql,(uno,ldata01,ldata02,ldata03,ldata04,ldata05,ldata06,ldata07,ldata08,ldata09,ldata10,ldata11,ldata12,ldata13,ldata14,ldata15,ldata16))
+        db35.commit()
+    except Exception as e:
+        print("거래 기록 인서트 에러", e)
+    finally:
+        cur35.close()
+        db35.close()
+
+
 

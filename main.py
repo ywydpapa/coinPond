@@ -90,6 +90,25 @@ def selllimitpr(key1, key2, coinn, setpr, setvol, uno):
     try:
         upbit = pyupbit.Upbit(key1, key2)
         orders = upbit.sell_limit_order(coinn, setpr, setvol)
+        print(orders)
+        if orders is not None:
+            ldata01 = datetime.now()
+            ldata02 = orders["uuid"]
+            ldata03 = orders["side"]
+            ldata04 = orders["ord_type"]
+            ldata05 = orders["price"]
+            ldata06 = orders["market"]
+            ldata07 = orders["created_at"]
+            ldata08 = orders["volume"]
+            ldata09 = orders["remaining_volume"]
+            ldata10 = orders["reserved_fee"]
+            ldata11 = orders["paid_fee"]
+            ldata12 = orders["locked"]
+            ldata13 = float(orders["executed_volume"])
+            ldata14 = float(0)
+            ldata15 = "0"
+            ldata16 = "0"
+            dbconn.insertLog(uno, ldata01, ldata02, ldata03, ldata04, ldata05, ldata06, ldata07, ldata08, ldata09, ldata10, ldata11, ldata12, ldata13, ldata14, ldata15, ldata16)
     except Exception as e:
         msg = "지정가 매도 에러 " + str(e)
         send_error(msg, uno)
@@ -154,6 +173,7 @@ def cancelaskorder(key1, key2, coinn, uno):  # 매도 주문 취소
             for order in orders:
                 if order['side'] == 'ask':
                     upbit.cancel_order(order["uuid"])
+                    dbconn.modifyLog(order["uuid"],"cancelled")
                 else:
                     print("매수 주문 유지")
         else:
