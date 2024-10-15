@@ -141,5 +141,5 @@ def get_trendnew(coinn):
         return trendresult
 
 
-trend = get_trendnew("KRW-ZETA")
+trend = get_trendnew("KRW-SUI")
 print(trend)
