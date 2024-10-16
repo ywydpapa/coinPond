@@ -2,6 +2,8 @@ import dotenv
 import pyupbit
 import os
 import pymysql
+import schedule
+import time
 
 
 dotenv.load_dotenv()
@@ -130,7 +132,37 @@ def setLog(uno):
         cur5.close()
         db5.close()
 
-setLog(1)
+
+def userlist():
+    global rows
+    db6 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur6 = db6.cursor()
+    try:
+        sql = "select userNo from pondUser where apiKey1 is not null"
+        cur6.execute(sql)
+        rows = cur6.fetchall()
+    except Exception as e:
+        print("사용자 조회 에러",e)
+    finally:
+        cur6.close()
+        db6.close()
+        return rows
 
 
+def runmain():
+    try:
+        users = userlist()
+        for user in users:
+            setLog(user)
+            time.sleep(10) #10초 대기 후 실행
+    except Exception as e:
+        print("자동 반복 실행 에러",e)
+    finally:
+        return True
 
+schedule.every(10).minutes.do(runmain)
+
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
