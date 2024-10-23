@@ -12,7 +12,7 @@ from dbconn import tradelog
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241014001
+mainver = 241023001
 
 
 def loadmyset(uno):
@@ -754,4 +754,4 @@ while True:
             if cnt > 3600:  # 1시간 마다 재시작
                 cnt = 1
                 service_restart()
-        time.sleep(1)
+        time.sleep(0.5)
