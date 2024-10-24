@@ -754,4 +754,4 @@ while True:
             if cnt > 3600:  # 1시간 마다 재시작
                 cnt = 1
                 service_restart()
-        time.sleep(0.5)
+        time.sleep(0.1)
