@@ -127,6 +127,21 @@ def getsetups(uno):
         db.close()
 
 
+def getmsetup(uno):
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur13 = db.cursor()
+    try:
+        sql = "select * from tradingSetup where userNo=%s and attrib not like %s"
+        cur13.execute(sql, (uno, '%XXXUP'))
+        data = list(cur13.fetchall())
+        return data
+    except Exception as e:
+        print('접속오류', e)
+    finally:
+        cur13.close()
+        db.close()
+
+
 def setonoff(uno,yesno):
     db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur14 = db.cursor()
@@ -163,7 +178,7 @@ def getsetonsvr(svrNo):
     cur16 = db.cursor()
     data = []
     try:
-        sql = "SELECT userNo from tradingSetup where attrib not like %s and serverNo=%s"
+        sql = "SELECT distinct userNo from tradingSetup where attrib not like %s and serverNo=%s"
         cur16.execute(sql,('%XXXUP', svrNo))
         data = cur16.fetchall()
         return data
