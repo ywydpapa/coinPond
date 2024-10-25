@@ -1,5 +1,8 @@
 import time
 from datetime import datetime
+
+from pyupbit import Upbit
+
 import dbconn
 import pyupbit
 import dotenv
@@ -571,14 +574,41 @@ def trace_trade_method(svrno):
 
 
 def mainService(svrno):
+    global uno
     users =  dbconn.getsetonsvr(svrno)
     try:
         for user in users:
             setups = dbconn.getmsetup(user)
-            for setup in setups:
-                print(setup)
+            for setup in setups: #(471, 18, 20000.0, 9, 1.0, 0.5, 'KRW-ZETA', 'Y', '43', 21, 'N', 6, 'N', datetime.datetime(2024, 10, 21, 9, 35, 4), '100001000010000')
+                if setup[7]!="Y":
+                    continue #구동중이지 않은 경우 통과
+                uno = setup[1]
+                vcoin = setup[6][4:] #코인명
+                keys = dbconn.getupbitkey(uno) # 키를 받아 오기
+                upbit = pyupbit.Upbit(keys[0], keys[1])
+                mycoins = upbit.get_balances()
+                mywon = 0 #보유 원화
+                myvcoin = 0 #보유 코인
+                vcoinprice = 0 #코인 현재가
+                for coin in mycoins:
+                    if coin["currency"] == "KRW":
+                        mywon = float(coin["balance"]) - float(coin["locked"])
+                        print("KRW", mywon)
+                    if coin["currency"] == vcoin:
+                        myvcoin = float(coin["balance"]) + float(coin["locked"])
+                        vcoinprice = float(coin["avg_buy_price"])
+                        print(vcoin,":",myvcoin, "Price :", vcoinprice)
+                # 지갑내용 받아오기 - 해당 코인만
+
+                # 주문 확인
+
+                # 주문 종류 - 신규, 추가, 재매도 결정
+
+                # 주문 실행
+
+                # 주문 기록
+
     except Exception as e:
-        uno = myset[1]
         msg = "메인 루프 에러 :" + str(e)
         send_error(msg, uno)
         print("메인 루프 에러 :", e)
