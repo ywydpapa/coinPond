@@ -589,7 +589,7 @@ def mainService(svrno):
                 mycoins = upbit.get_balances()
                 mywon = 0 #보유 원화
                 myvcoin = 0 #보유 코인
-                vcoinprice = 0 #코인 현재가
+                vcoinprice = 0 #코인 평균 구매가
                 for coin in mycoins:
                     if coin["currency"] == "KRW":
                         mywon = float(coin["balance"]) - float(coin["locked"])
@@ -599,15 +599,58 @@ def mainService(svrno):
                         vcoinprice = float(coin["avg_buy_price"])
                         print(vcoin,":",myvcoin, "Price :", vcoinprice)
                 # 지갑내용 받아오기 - 해당 코인만
-
+                coinn = "KRW-"+vcoin
+                curprice = pyupbit.get_current_price(coinn)
+                print("코인 현재 시장가", curprice)
+                myorders = upbit.get_order(coinn)
+                cntask = 0 #매도 주문수
+                cntbid = 0 #매수 주문수
+                for order in myorders:
+                    if order["side"] == "ask":
+                        cntask = cntask + 1
+                    if order["side"] == "bid":
+                        cntbid = cntbid + 1
+                norasset = [1, 3, 7, 15, 31, 63, 127, 255, 511, 1023]
+                cntpost = 0 #매수 회차 산출 프로세스
+                for order in myorders:
+                    if order['side'] == 'ask':
+                        amt = float(order['volume']) * float(order['price'])
+                        print("기존 투입 금액 ", amt)
+                        cnt = round(amt / float(setup[2]))
+                        print("산출 배수 ", cnt)
+                        if cnt not in norasset:  # 목록에 없을 경우
+                            for i in norasset:
+                                if cnt > i:
+                                    cntpost += 1
+                        else:
+                            cntpost = norasset.index(cnt) + 1
+                print("산출 회차 ", cntpost)
                 # 주문 확인
-
+                bidprice = 0
+                bidprice = float(setup[2])*2**(cntpost)
+                print("다음 매수 금액 : ",bidprice)
+                #다음 투자금 확인
+                ordtype = 0
+                if cntask == 0 and cntbid == 0:
+                    print("새로운 주문")
+                    ordtype = 1
+                if cntask ==0 and cntbid !=0:
+                    print("취소후 재주문")
+                    ordtype = 2
+                if cntask !=0 and cntbid ==0:
+                    print("추가 매수 주문")
+                    ordtype = 3
+                else:
+                    print("매도매수 대기중")
+                    ordtype = 0
                 # 주문 종류 - 신규, 추가, 재매도 결정
-
+                print("주문실행 ", ordtype)
                 # 주문 실행
 
                 # 주문 기록
 
+                print("사용자 ",setup[1],"설정번호 ",setup[0]," 코인 ",setup[6], " 종료")
+                print("------------------------")
     except Exception as e:
         msg = "메인 루프 에러 :" + str(e)
         send_error(msg, uno)
