@@ -15,7 +15,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241026001
+mainver = 241026002
 
 
 def loadmyset(uno):
