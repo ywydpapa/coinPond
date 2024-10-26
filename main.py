@@ -29,29 +29,6 @@ def loadmyset(uno):
         return mysett
 
 
-def getkeys(uno):
-    global mykey
-    try:
-        mykey = dbconn.getupbitkey(uno)
-    except Exception as e:
-        msg = "API 키조회 에러 " + str(e)
-        send_error(msg, uno)
-    finally:
-        return mykey
-
-
-def getorders(key1, key2, coinn, uno):
-    global orders
-    try:
-        upbit = pyupbit.Upbit(key1, key2)
-        orders = upbit.get_order(coinn)
-    except Exception as e:
-        msg = "주문 내역 조회 에러 " + str(e)
-        send_error(msg, uno)
-    finally:
-        return orders
-
-
 def buymarketpr(key1, key2, coinn, camount, uno):
     global orders
     try:
@@ -71,18 +48,6 @@ def buylimitpr(key1, key2, coinn, setpr, setvol, uno):
         orders = upbit.buy_limit_order(coinn, setpr, setvol)
     except Exception as e:
         msg = "지정가 구매 명령 에러 " + str(e)
-        send_error(msg, uno)
-    finally:
-        return orders
-
-
-def sellmarketpr(key1, key2, coinn, setvol, uno):
-    global orders
-    try:
-        upbit = pyupbit.Upbit(key1, key2)
-        orders = upbit.sell_market_order(coinn, setvol)
-    except Exception as e:
-        msg = " 시장가 매도 에러 " + str(e)
         send_error(msg, uno)
     finally:
         return orders
@@ -203,90 +168,6 @@ def canclebidorder(key1, key2, coinn, uno):  # 청산
         send_error(msg, uno)
 
 
-def checkbidorder(key1, key2, coinn, uno):
-    try:
-        upbit = pyupbit.Upbit(key1, key2)
-        orders = upbit.get_order(coinn)
-        for order in orders:
-            if order['side'] == 'bid':
-                return True
-            else:
-                return False
-    except Exception as e:
-        msg = "매수 주문 체크 에러 " + str(e)
-        send_error(msg, uno)
-
-
-def loadtrset(sno, uno):
-    global trset
-    try:
-        trset = dbconn.setdetail(sno)
-        trsetting = trset[3:23]
-        return trsetting
-    except Exception as e:
-        msg = "거래 세팅 조회 에러 " + str(e)
-        send_error(msg, uno)
-
-def order_mod_ask(key1, key2, coinn, profit, uno):  #이윤 고정식 계산 방식
-    print("매도 주문 재생성")
-    try:
-        preprice = pyupbit.get_current_price(coinn)  # 현재값 로드
-        cancelaskorder(key1, key2, coinn, uno)  # 기존 매도 주문 취소
-        tradednew = checktraded(key1, key2, coinn, uno)  # 설정 코인 지갑내 존재 확인
-        setprice = preprice * (1.005 + (profit / 100.0))
-        setprice = calprice(setprice, uno)
-        setvolume = tradednew['balance']
-        selllimitpr(key1, key2, coinn, setprice, setvolume, uno)
-        # 새로운 매도 주문
-    except Exception as e:
-        msg = "매도주문 갱신 에러 "+ str(e)
-        send_error(msg, uno)
-
-
-def order_mod_ask2(key1, key2, coinn, profit, uno):  #이윤 변동식 계산 방식
-    print("매도 주문 재생성2")
-    try:
-        cancelaskorder(key1, key2, coinn, uno)  # 기존 매도 주문 취소
-        tradednew = checktraded(key1, key2, coinn, uno)  # 설정 코인 지갑내 존재 확인
-        totalamt = (float(tradednew['balance']) + float(tradednew['locked'])) * float(
-            tradednew['avg_buy_price'])  # 전체 구매 금액
-        totalvol = float(tradednew['balance']) + float(tradednew['locked'])  # 전체 구매 수량
-        totalamt = totalamt + (totalamt * profit[0] / 100)
-        print("재설정 이윤 :", profit[0])
-        print(totalamt)
-        print(totalvol)
-        setprice = totalamt / totalvol
-        setprice = calprice(setprice, uno)
-        globals()['mysell_{}'.format(seton[0])] = setprice
-        selllimitpr(key1, key2, coinn, setprice, totalvol, uno)
-        # 새로운 매도 주문
-    except Exception as e:
-        msg = '매도주문2 갱신 에러 '+str(e)
-        send_error(msg, uno)
-
-
-def order_mod_ask3(key1, key2, coinn, profit, uno):  #분산형 매도주문 생성
-    print("매도 주문 재생성 3")
-    try:
-        cancelaskorder(key1, key2, coinn, uno)  # 기존 매도 주문 취소
-        tradednew = checktraded(key1, key2, coinn, uno)  # 설정 코인 지갑내 존재 확인
-        totalamt = (float(tradednew['balance']) + float(tradednew['locked'])) * float(
-            tradednew['avg_buy_price'])  # 전체 구매 금액
-        totalvol = float(tradednew['balance']) + float(tradednew['locked'])  # 전체 구매 수량
-        totalamt = totalamt + (totalamt * profit[0] / 100)
-        print("재설정 이윤 :", profit[0])
-        print(totalamt)
-        print(totalvol)
-        setprice = totalamt / totalvol
-        setprice = calprice(setprice, uno)
-        globals()['mysell_{}'.format(seton[0])] = setprice
-        selllimitpr(key1, key2, coinn, setprice, totalvol, uno)
-        # 새로운 매도 주문
-    except Exception as e:
-        msg = '매도주문 갱신3 에러 '+str(e)
-        send_error(msg, uno)
-
-
 def order_mod_ask5(key1, key2, coinn, profit, uno):  #이윤 변동식 계산 방식
     print("매도 주문5 재생성")
     try:
@@ -306,18 +187,6 @@ def order_mod_ask5(key1, key2, coinn, profit, uno):  #이윤 변동식 계산 �
     except Exception as e:
         msg = '매도주문5 갱신 에러 '+str(e)
         send_error(msg, uno)
-
-
-def clear_param():
-    setons = dbconn.getseton()
-    for seton in setons:
-        globals()['lcnt_{}'.format(seton[0])] = 0  # 거래단계 초기화
-        globals()['bcnt_{}'.format(seton[0])] = 0  # 점검횟수 초기화
-        globals()['tcnt_{}'.format(seton[0])] = 0  # 거래 예약 횟수 초기화
-        globals()['askcnt_{}'.format(seton[0])] = 0  # 매도거래 수
-        globals()['bidcnt_{}'.format(seton[0])] = 0  # 매수거래 수
-        globals()['mysell_{}'.format(seton[0])] = 0  # 매도 설정 금액
-    return None
 
 
 def get_trend(coinn , uno):
@@ -374,42 +243,6 @@ def get_trend(coinn , uno):
         send_error(msg, uno)
     finally:
         return trend, opoint + cpoint + hpoint + lpoint, vpoint
-
-
-def order_new_bid_mod(key1, key2, coinn, initAsset, intval, intergap, profit, uno):
-    global buyrest, bidasset, bidcnt, askcnt
-    print("새로운 주문 함수 실행")
-    cancelaskorder(key1, key2, coinn, uno)  # 기존 매도 주문 모두 취소
-    canclebidorder(key1, key2, coinn, uno)  # 기존 매수 주문 모두 취소
-    preprice = pyupbit.get_current_price(coinn)  # 현재값 로드
-    try:
-        bidasset = initAsset
-        buyrest = buymarketpr(key1, key2, coinn, bidasset,uno)  # 첫번째 설정 구매
-        print("시장가 구매", buyrest)
-    except Exception as e:
-        myset = loadmyset(seton)
-        uno = myset[1]
-        msg = '시장가 구매 에러 '+ str(e)
-        send_error(msg, uno)
-        print(e)
-    finally:
-        print("1단계 매수내역 :", buyrest)
-        traded = checktraded(key1, key2, coinn, uno)  # 설정 코인 지갑내 존재 확인
-        setprice = preprice * (1.0 + (profit / 100.0))
-        setprice = calprice(setprice, uno)
-        setvolume = traded['balance']
-        selllimitpr(key1, key2, coinn, setprice, setvolume, uno)
-    # 추가 예약 매수 실행
-    for i in range(1, intval + 1):
-        bidprice = ((preprice * 100) - (preprice * intergap[i])) / 100
-        bidprice = calprice(bidprice, uno)
-        bidasset = bidasset * 2
-        preprice = bidprice  #현재가에 적용
-        bidvol = bidasset / bidprice
-        buylimitpr(key1, key2, coinn, bidprice, bidvol, uno)
-        print("매수 실행")
-    globals()['mybuy_{}'.format(seton[0])] = 1  # 매도 설정 횟수
-    return None
 
 
 def add_new_bid(key1, key2, coinn, bidprice, bidvol, uno):
@@ -700,57 +533,13 @@ def check_holdstart(min,uno,coinn): # 홀드시작이후 시간 체크
         save_holdtime(uno, coinn)  #새로운 홀드 카운트 시작
 
 
-def cntbid(ckey1, ckey2, coinn, iniAsset, dblyn, uno):
-    global cntpost
-    try:
-        cntpost = 1
-        orders = getorders(ckey1, ckey2, coinn, uno)
-        norasset = [1,3,7,15,31,63,127,255,511,1023]
-        dblasset = [1,3,9,27,81,243,729,2187,6561,19683]
-        for order in orders:
-            if order['side'] == 'ask':
-                amt = float(order['volume']) * float(order['price'])
-                print("기존 투입 금액 ",amt)
-                cnt = round(amt/float(iniAsset))
-                print("산출 배수 ",cnt)
-                if dblyn != 'Y':
-                    if cnt not in norasset: # 목록에 없을 경우
-                        for i in norasset:
-                            if cnt > i:
-                                cntpost += 1
-                    else:
-                        cntpost = norasset.index(cnt) + 1
-                else:
-                    if cnt not in dblasset:
-                        for i in dblasset:
-                            if cnt > i:
-                                cntpost += 1
-                    else:
-                        cntpost = dblasset.index(cnt) + 1
-                print("산출 회차 ", cntpost)
-    except Exception as e:
-        msg = "매수단계 카운트 에러" + str(e)
-        send_error(msg, uno)
-    finally:
-        return cntpost
-
-
 cnt = 1
 setons = dbconn.getseton()
-for seton in setons:
-    globals()['lcnt_{}'.format(seton[0])] = 0 # 거래단계 초기화
-    globals()['bcnt_{}'.format(seton[0])] = 0  # 점검횟수 초기화
-    globals()['tcnt_{}'.format(seton[0])] = 0  # 거래 예약 횟수 초기화
-    globals()['askcnt_{}'.format(seton[0])] = 0  # 매도거래 수
-    globals()['bidcnt_{}'.format(seton[0])] = 0  # 매수거래 수
-    globals()['mysell_{}'.format(seton[0])] = 0  # 매도 설정 금액
-    globals()['mybuy_{}'.format(seton[0])] = 0  # 매수 단계 카운트
 service_start() # 시작시간 기록
 while True:
     print("구동 횟수 : ", cnt)
     for seton in setons:
         try:
-            #trace_trade_method(svrno)
             mainService(svrno)
             cnt = cnt + 1
         except Exception as e:
