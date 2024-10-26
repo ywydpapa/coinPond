@@ -10,7 +10,7 @@ import os
 import sys
 import requests
 
-from dbconn import tradelog
+from dbconn import tradelog, setdetail
 
 dotenv.load_dotenv()
 bidcnt = 1
@@ -128,7 +128,7 @@ def checktraded(key1, key2, coinn, uno):
         for wallet in checktrad:
             if "KRW-" + wallet['currency'] == coinn:
                 if float(wallet['balance']) != 0.0:
-                    print("잔고 남아 재거래")
+                    print("잔고 남아 재거래 실행")
                 else:
                     print('매도 거래 대기중')
                 return wallet
@@ -422,155 +422,36 @@ def add_new_bid(key1, key2, coinn, bidprice, bidvol, uno):
         send_error(msg, uno)
 
 
-def trace_trade_method(svrno):
-    global orderstat, key1, key2, coinn, askcnt, bidcnt, traded, seton, targetamt, pbidcnt
-    setons = dbconn.getsetonsvr(svrno)  # 서버별 사용자 로드
+def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
+    global buyrest, bidasset, bidcnt, askcnt
+    print("새로운 주문 함수 실행")
+    cancelaskorder(key1, key2, coinn, uno)  # 기존 매도 주문 모두 취소
+    canclebidorder(key1, key2, coinn, uno)  # 기존 매수 주문 모두 취소
+    preprice = pyupbit.get_current_price(coinn)  # 현재값 로드
     try:
-        for seton in setons:  # 개별 프로세스 시작
-            keys = getkeys(seton)
-            key1 = keys[0]  # 키로드
-            key2 = keys[1]  # 키로드
-            myset = loadmyset(seton)  # 트레이딩 셋업로드
-            print("투자설정 내용 : ", myset)
-            print("User ", myset[1], "Coin ", myset[6], " seed ", myset[2], " start")
-            bidcount = cntbid(key1, key2, myset[6], myset[2], myset[12], myset[1])  # 매수 단계 확인
-            ckhld = get_lasttrade(key1, key2, myset[6], myset[1])
-            print("Last HOLD : ",ckhld)
-            if ckhld == None:
-                dbconn.tradelog(myset[1], 'HOLD', myset[6], datetime.now())
-            chklstb = get_lastbuy(key1, key2,myset[6],myset[1])
-            print('Last BID : ',chklstb)
-            if chklstb == None:
-                dbconn.tradelog(myset[1], 'BID', myset[6], datetime.now())
-            if myset[7] == 'Y':  # 주문 ON 인 경우
-                iniAsset = myset[2]  # 기초 투입금액
-                interVal = myset[3]  # 매수 횟수
-                trset = myset[8]  # 투자 설정
-                holdpost = myset[11] # 홀드 포지션
-                if holdpost > 2:
-                    if bidcount >= holdpost:
-                        # dbconn.setholdYN(myset[0] ,'Y')  # 홀드 설정
-                        print("홀드 조건 해당")
-                    else:
-                        print("홀드 조건 아님")
-                        pass  #  dbconn.setholdYN(myset[0] ,'N')
-                else:
-                    print("홀드 설정 아님")
-                print("매수 카운트 11 : ", bidcount)
-                print("홀드 포지션 11 : ", holdpost)
-                trsetting = loadtrset(trset, myset[1])  # 투자 설정 로드
-                intergap = trsetting[:10]  # 매수 간격
-                # print("매수간격 설정내용 :", intergap)
-                intRate = trsetting[10:20]  # 매수 이율
-                # print("매수 이율 설정 내용 : ", intRate)
-                coinn = myset[6]  # 매수 종목
-                cointrend = get_trend(coinn,myset[1])  # 코인 트렌드 검색
-                coinsignal = dbconn.getSignal(coinn) # 시간당 코인 트렌드 조회
-                print("트렌드 시그날 내용 : ",coinsignal)
-                orderstat = getorders(keys[0], keys[1], myset[6], myset[1])  # 주문현황 조회
-                globals()['askcnt_{}'.format(seton[0])] = 0
-                globals()['bidcnt_{}'.format(seton[0])] = 0
-                for order in orderstat:  # 주문 확인
-                    if order["side"] == 'ask':
-                        globals()['askcnt_{}'.format(seton[0])] = globals()['askcnt_{}'.format(seton[0])] + 1
-                    elif order["side"] == 'bid':
-                        globals()['bidcnt_{}'.format(seton[0])] = globals()['bidcnt_{}'.format(seton[0])] + 1
-                print("매도요청 수 : ", globals()['askcnt_{}'.format(seton[0])])  # 매도요청 수
-                print("매수요청 수 : ", globals()['bidcnt_{}'.format(seton[0])])  # 매수요청 수
-                traded = checktraded(keys[0], keys[1], coinn, myset[1])  # 설정 코인 지갑내 존재 확인
-                print(traded)
-                if myset[10] == 'Y': # 홀드 주문 취소 프로세스
-                    print("홀드 설정 사용중")
-                    if bidcount >= holdpost:
-                        # dbconn.setholdYN(myset[0] ,'Y')  # 홀드 설정
-                        dlytime = check_hold(60,myset[1],coinn)
-                        if dlytime != "SALE":
-                            canclebidorder(key1, key2, coinn, myset[1])  # 전체 매수 주문 취소
-                            print("홀드 조건에 1시간 이내 매수주문 취소")
-                        print("홀드 조건 해당")
-                    else:
-                        print("홀드 조건 아님")
-                        pass  #  dbconn.setholdYN(myset[0] ,'N')
-                else:
-                    print("홀드 설정 미사용")
-                if traded == None: # 최초 거래 실시
-                    order_new_bid_mod(key1, key2, coinn, iniAsset, 1, intergap, intRate[1], myset[1]) # 구간은 리스트로 이율은 상수로
-                elif float(traded["balance"]) + float(traded["locked"]) > 0:
-                    if float(traded["balance"]) > 0:
-                        print("매도 수정 처리 1")
-                        inrate = intRate[bidcount+1]
-                        print(bidcount," 단계 이율 적용 : ", inrate)
-                        order_mod_ask5(key1, key2, coinn, inrate, myset[1])  # 매도 수정 처리
-                    elif globals()['bidcnt_{}'.format(seton[0])] == 0:  # 매수주문 없음
-                        print("매수 주문 없음 check 추가 매수 프로세스")
-                        if cointrend[1] > -12:
-                            print("신호등 긍정 ", cointrend[1])
-                            apprate = float(intergap[bidcount])/100 # 매수단계별 구간 적용
-                            print("매수 단계 :",bidcount,"적용 비율 ",apprate)
-                            if bidcount >= holdpost:  # 홀드 구간
-                                bidprice = float(pyupbit.get_current_price(coinn)) * (1-float(apprate)*1.2) # 현재가에 단계 구간 적용(120% 구간 적용)
-                            else:
-                                bidprice = float(pyupbit.get_current_price(coinn)) * (1-float(apprate))  # 현재가에 단계 구간 적용
-                            bidprice = calprice(bidprice, myset[1]) # 적용 가격 변환
-                            print("적용 가격: ", bidprice)
-                            totalamt = (float(traded["balance"]) + float(traded["locked"])) * float(traded["avg_buy_price"])
-                            if myset[12] == "Y":
-                                pbidcnt = bidcount
-                                targetamt = round(totalamt * 2) # 구매가의 2배 구매
-                                print("구매금액 : ",targetamt)
-                            else:
-                                pbidcnt = bidcount
-                                targetamt = iniAsset*2**pbidcnt
-                                print("구매금액 : ",targetamt)
-                            print("구매단계 체크 : ", pbidcnt)
-                            print("주문 금액 체크 : ", targetamt)
-                            bidvol = targetamt / bidprice #구매 수량 산출
-                            print("주문 수량 산출 : ",bidvol)
-                            prevbid = get_lastbuy(key1, key2, coinn, myset[1])
-                            print("직전 구매 시간",prevbid)
-                            # 일반 구매 시 딜레이 타임
-                            if bidcount >= holdpost:
-                                dlytime = check_hold(60,myset[1],coinn) #홀드 구매 딜레이 신호등
-                            else:
-                                dlytime = chk_lastbid(coinn, myset[1], 3) # 기본 구매 딜레이 신호
-                            if dlytime == "SALE":
-                                print("딜레이신호등 통과")
-                                if bidcount >= holdpost:  #홀드 구간 비율 상승 재주문
-                                    print("홀드 구간 매수재주문")
-                                    add_new_bid(key1, key2, coinn, bidprice, bidvol, myset[1])
-                                else:
-                                    print("일반 구간 매수재주문")
-                                    add_new_bid(key1, key2, coinn, bidprice, bidvol, myset[1])
-                            else:
-                                print("딜레이신호등 작동중 (",dlytime,")")
-                                if pbidcnt in[1,2,3,4]:
-                                    print("초기 구매 딜레이 없이 작동")
-                                    add_new_bid(key1, key2, coinn, bidprice, bidvol, myset[1])
-                                pass
-                        else:
-                            print("신호등 부정", cointrend[1])
-                            pass  # 대기
-                        print(get_lasttrade(key1, key2, coinn, myset[1]))
-                    else:
-                        print("매도 대기중")
-                        pass
-            else:
-                print("User ", myset[1], 'Status is Off')
-            #get_lastbuy(key1, key2, coinn, myset[1])
-            print("User ", myset[1], " ", myset[6], " finish")
+        bidasset = initAsset #매수 금액
+        buyrest = buymarketpr(key1, key2, coinn, bidasset,uno)  # 첫번째 설정 구매
+        print("시장가 구매", buyrest)
     except Exception as e:
-        myset = loadmyset(seton)
-        uno = myset[1]
-        msg = "메인 루프 에러 :"+str(e)
+        msg = '시장가 구매 에러 '+ str(e)
         send_error(msg, uno)
-        print("메인 루프 에러 :", e)
+        print(msg)
     finally:
-        ntime = datetime.now()
-        print('**********')
-        print('거래점검 시간', ntime)
-        print('거래점검 완료', cnt)
-        print('**********')
-        dbconn.clearcache()  # 캐쉬 삭제
+        print("1단계 매수내역 :", buyrest)
+        traded = checktraded(key1, key2, coinn, uno)  # 설정 코인 지갑내 존재 확인
+        setprice = float(traded["avg_buy_price"]) * (1.0 + (profit / 100.0))
+        setprice = calprice(setprice, uno)
+        setvolume = traded['balance']
+        selllimitpr(key1, key2, coinn, setprice, setvolume, uno)
+    # 추가 예약 매수 실행
+        bidprice = ((preprice * 100) - (preprice * intergap)) / 100
+        bidprice = calprice(bidprice, uno)
+        bidasset = bidasset * 2
+        preprice = bidprice  #현재가에 적용
+        bidvol = bidasset / bidprice
+        buylimitpr(key1, key2, coinn, bidprice, bidvol, uno)
+        print("1단계 매수 실행 완료")
+    return None
 
 
 def mainService(svrno):
@@ -590,12 +471,14 @@ def mainService(svrno):
                 mywon = 0 #보유 원화
                 myvcoin = 0 #보유 코인
                 vcoinprice = 0 #코인 평균 구매가
+                myrestvcoin = 0
                 for coin in mycoins:
                     if coin["currency"] == "KRW":
                         mywon = float(coin["balance"]) - float(coin["locked"])
                         print("KRW", mywon)
                     if coin["currency"] == vcoin:
                         myvcoin = float(coin["balance"]) + float(coin["locked"])
+                        myrestvcoin = float(coin["balance"])
                         vcoinprice = float(coin["avg_buy_price"])
                         print(vcoin,":",myvcoin, "Price :", vcoinprice)
                 # 지갑내용 받아오기 - 해당 코인만
@@ -634,21 +517,50 @@ def mainService(svrno):
                 if cntask == 0 and cntbid == 0:
                     print("새로운 주문")
                     ordtype = 1
-                if cntask ==0 and cntbid !=0:
+                elif cntask ==0 and cntbid !=0:
                     print("취소후 재주문")
                     ordtype = 2
-                if cntask !=0 and cntbid ==0:
+                elif cntask !=0 and cntbid ==0:
                     print("추가 매수 주문")
                     ordtype = 3
                 else:
                     print("매도매수 대기중")
                     ordtype = 0
                 # 주문 종류 - 신규, 추가, 재매도 결정
-                print("주문실행 ", ordtype)
+                trsets = setdetail(setup[8]) #상세 투자 설정
+                intvset = trsets[3:13] #투자설정 간격
+                marginset = trsets[13:23] #투자설정 이율
+                bidintv = intvset[cntpost]
+                bidmargin = marginset[cntpost]
+                bideaprice = calprice(float(curprice*(1+bidintv/100)),uno) #목표 단가
+                bidvolume = float(bidprice)/float(bideaprice)
+                print("매수설정단가 ", bideaprice)
+                print("매수설정개수 ", bidvolume)
+                print("설정회차", cntpost)
+                print("설정금액",bidprice)
+                print("설정간격", bidintv)
+                print("설정이윤", bidmargin)
+                if ordtype == 1:
+                    print("주문실행 설정", ordtype)
+                    first_trade(keys[0], keys[1], coinn,bidprice, bidintv, bidmargin,uno)
+                if ordtype == 2:
+                    print("주문실행 설정", ordtype)
+                    canclebidorder(keys[0], keys[1], coinn, uno)
+
+                if ordtype == 3:
+                    print("주문실행 설정", ordtype)
+                    #보유 현금이 충분할 경우만 실행
+                    if mywon >= bidprice:
+                        add_new_bid(keys[0],keys[1],coinn,bideaprice,bidvolume,uno)
+                    else:
+
+                        print("현금 부족으로 주문 패스 (보유현금 :",mywon,")")
                 # 주문 실행
-
+                if myrestvcoin != 0:
+                    print("잔여 코인 존재: ", myrestvcoin)
+                    order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
+                # 주문 수정
                 # 주문 기록
-
                 print("사용자 ",setup[1],"설정번호 ",setup[0]," 코인 ",setup[6], " 종료")
                 print("------------------------")
     except Exception as e:
@@ -659,7 +571,7 @@ def mainService(svrno):
         ntime = datetime.now()
         print('$$$$$$$$$$$$$$$$$$$')
         print('거래점검 시간', ntime)
-        print('거래점검 완료', cnt)
+        print('점검 서버', svrno)
         print('$$$$$$$$$$$$$$$$$$$')
         dbconn.clearcache()  # 캐쉬 삭제
 
@@ -850,4 +762,4 @@ while True:
             if cnt > 3600:  # 1시간 마다 재시작
                 cnt = 1
                 service_restart()
-        time.sleep(10)
+        time.sleep(3)
