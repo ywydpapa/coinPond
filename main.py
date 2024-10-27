@@ -15,7 +15,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241026002
+mainver = 241027001
 
 
 def loadmyset(uno):
@@ -258,13 +258,14 @@ def add_new_bid(key1, key2, coinn, bidprice, bidvol, uno):
 def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
     global buyrest, bidasset, bidcnt, askcnt
     print("새로운 주문 함수 실행")
-    cancelaskorder(key1, key2, coinn, uno)  # 기존 매도 주문 모두 취소
-    canclebidorder(key1, key2, coinn, uno)  # 기존 매수 주문 모두 취소
+    #cancelaskorder(key1, key2, coinn, uno)  # 기존 매도 주문 모두 취소
+    #canclebidorder(key1, key2, coinn, uno)  # 기존 매수 주문 모두 취소
     preprice = pyupbit.get_current_price(coinn)  # 현재값 로드
     try:
         bidasset = initAsset #매수 금액
         buyrest = buymarketpr(key1, key2, coinn, bidasset,uno)  # 첫번째 설정 구매
         print("시장가 구매", buyrest)
+        time.sleep(1)
     except Exception as e:
         msg = '시장가 구매 에러 '+ str(e)
         send_error(msg, uno)
@@ -376,18 +377,18 @@ def mainService(svrno):
                 if ordtype == 1:
                     print("주문실행 설정", ordtype)
                     first_trade(keys[0], keys[1], coinn,bidprice, bidintv, bidmargin,uno)
-                if ordtype == 2:
+                elif ordtype == 2:
                     print("주문실행 설정", ordtype)
                     canclebidorder(keys[0], keys[1], coinn, uno)
-
-                if ordtype == 3:
+                elif ordtype == 3:
                     print("주문실행 설정", ordtype)
                     #보유 현금이 충분할 경우만 실행
                     if mywon >= bidprice:
                         add_new_bid(keys[0],keys[1],coinn,bideaprice,bidvolume,uno)
                     else:
-
                         print("현금 부족으로 주문 패스 (보유현금 :",mywon,")")
+                else:
+                    print("해당 주문 설정 없음")
                 # 주문 실행
                 if myrestvcoin != 0:
                     print("잔여 코인 존재: ", myrestvcoin)
