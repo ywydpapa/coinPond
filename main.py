@@ -181,7 +181,6 @@ def order_mod_ask5(key1, key2, coinn, profit, uno):  #이윤 변동식 계산 �
         print(totalvol)
         setprice = totalamt / totalvol
         setprice = calprice(setprice, uno)
-        globals()['mysell_{}'.format(seton[0])] = setprice
         selllimitpr(key1, key2, coinn, setprice, totalvol, uno)
         # 새로운 매도 주문
     except Exception as e:
@@ -248,7 +247,7 @@ def get_trend(coinn , uno):
 def add_new_bid(key1, key2, coinn, bidprice, bidvol, uno):
     try:
         ret = buylimitpr(key1, key2, coinn, bidprice, bidvol, uno)
-        # tradelog(uno,"BID", coinn, datetime.now()) #주문 기록
+        tradelog(uno,"BID", coinn, datetime.now()) #주문 기록
         return ret
     except Exception as e:
         msg = "추가매수 진행 에러 "+str(e)
@@ -298,6 +297,7 @@ def mainService(svrno):
                 if setup[7]!="Y":
                     continue #구동중이지 않은 경우 통과
                 uno = setup[1]
+                holdcnt = setup[11]
                 vcoin = setup[6][4:] #코인명
                 keys = dbconn.getupbitkey(uno) # 키를 받아 오기
                 upbit = pyupbit.Upbit(keys[0], keys[1])
@@ -342,31 +342,32 @@ def mainService(svrno):
                         else:
                             cntpost = norasset.index(cnt) + 1
                 print("산출 회차 ", cntpost)
+                holdstat = ""
+                if holdcnt <= cntpost:
+                    holdstat = "Y"
+                else:
+                    holdstat = "N"
                 # 주문 확인
                 bidprice = 0
                 bidprice = float(setup[2])*2**(cntpost)
                 print("다음 매수 금액 : ",bidprice)
                 #다음 투자금 확인
                 ordtype = 0
-                if cntask == 0 and cntbid == 0:
-                    print("새로운 주문")
+                if cntask == 0 and cntbid == 0:  #신규주문
                     ordtype = 1
-                elif cntask ==0 and cntbid !=0:
-                    print("취소후 재주문")
+                elif cntask ==0 and cntbid !=0:  #매도후 매수취소
                     ordtype = 2
-                elif cntask !=0 and cntbid ==0:
-                    print("추가 매수 주문")
+                elif cntask !=0 and cntbid ==0:  #추가 매수 진행
+                    #홀드 및 신호등 체크 !!!!!
                     ordtype = 3
                 else:
-                    print("매도매수 대기중")
-                    ordtype = 0
-                # 주문 종류 - 신규, 추가, 재매도 결정
+                    ordtype = 0 # 기타
                 trsets = setdetail(setup[8]) #상세 투자 설정
                 intvset = trsets[3:13] #투자설정 간격
                 marginset = trsets[13:23] #투자설정 이율
                 bidintv = intvset[cntpost]
                 bidmargin = marginset[cntpost]
-                bideaprice = calprice(float(curprice*(1+bidintv/100)),uno) #목표 단가
+                bideaprice = calprice(float(curprice*(1-bidintv/100)),uno) #목표 단가
                 bidvolume = float(bidprice)/float(bideaprice)
                 print("매수설정단가 ", bideaprice)
                 print("매수설정개수 ", bidvolume)
@@ -394,6 +395,7 @@ def mainService(svrno):
                     print("잔여 코인 존재: ", myrestvcoin)
                     order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
                 # 주문 수정
+
                 # 주문 기록
                 print("사용자 ",setup[1],"설정번호 ",setup[0]," 코인 ",setup[6], " 종료")
                 print("------------------------")

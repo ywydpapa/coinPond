@@ -208,13 +208,11 @@ def tradelog(uno,type,coinn,tstamp):
     try:
         if tstamp == "":
             tstamp = datetime.now()
-        sql = "update tradeLog set attrib = %s where userNo = %s and tradeType = %s and coinName = %s"
-        cur32.execute(sql, ("UPD00UPD00UPD00", uno, type, coinn))
         sql = "INSERT INTO tradeLog (userNo, tradeType, coinName, regDate) VALUES (%s, %s, %s, %s)"
         cur32.execute(sql,(uno, type, coinn, tstamp))
         db32.commit()
     except Exception as e:
-        print('접속오류 트레이드 로그', e)
+        print('트레이드 로그실행 오류', e)
     finally:
         cur32.close()
         db32.close()
