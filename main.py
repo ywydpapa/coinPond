@@ -319,7 +319,7 @@ def mainService(svrno):
                 coinn = "KRW-"+vcoin
                 curprice = pyupbit.get_current_price(coinn)
                 print("코인 현재 시장가", curprice)
-                myorders = upbit.get_order(coinn)
+                myorders = upbit.get_order(coinn, state='wait')
                 cntask = 0 #매도 주문수
                 cntbid = 0 #매수 주문수
                 for order in myorders:
@@ -363,8 +363,8 @@ def mainService(svrno):
                 else:
                     ordtype = 0 # 기타
                 trsets = setdetail(setup[8]) #상세 투자 설정
-                intvset = trsets[3:13] #투자설정 간격
-                marginset = trsets[13:23] #투자설정 이율
+                intvset = trsets[4:13] #투자설정 간격
+                marginset = trsets[14:23] #투자설정 이율
                 bidintv = intvset[cntpost]
                 bidmargin = marginset[cntpost]
                 bideaprice = calprice(float(curprice*(1-bidintv/100)),uno) #목표 단가
