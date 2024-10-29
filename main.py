@@ -1,8 +1,6 @@
 import time
 from datetime import datetime
-
 from pyupbit import Upbit
-
 import dbconn
 import pyupbit
 import dotenv
@@ -305,7 +303,7 @@ def mainService(svrno):
                 mywon = 0 #보유 원화
                 myvcoin = 0 #보유 코인
                 vcoinprice = 0 #코인 평균 구매가
-                myrestvcoin = 0
+                myrestvcoin = 0 #잔여 코인
                 for coin in mycoins:
                     if coin["currency"] == "KRW":
                         mywon = float(coin["balance"]) - float(coin["locked"])
@@ -322,9 +320,16 @@ def mainService(svrno):
                 myorders = upbit.get_order(coinn, state='wait')
                 cntask = 0 #매도 주문수
                 cntbid = 0 #매수 주문수
+                lastbidsec = 0
                 for order in myorders:
+                    nowt = datetime.now()
                     if order["side"] == "ask":
                         cntask = cntask + 1
+                        last = order["created_at"]
+                        last = last.replace("T", " ")
+                        last = last[:-6]
+                        last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+                        lastbidsec = (nowt - last).seconds
                     if order["side"] == "bid":
                         cntbid = cntbid + 1
                 norasset = [1, 3, 7, 15, 31, 63, 127, 255, 511, 1023]
@@ -342,6 +347,7 @@ def mainService(svrno):
                         else:
                             cntpost = norasset.index(cnt) + 1
                 print("산출 회차 ", cntpost)
+                print("직전 주문 경과시간 ",lastbidsec,"초")
                 holdstat = ""
                 if holdcnt <= cntpost:
                     holdstat = "Y"
@@ -359,7 +365,11 @@ def mainService(svrno):
                     ordtype = 2
                 elif cntask !=0 and cntbid ==0:  #추가 매수 진행
                     #홀드 및 신호등 체크 !!!!!
-                    ordtype = 3
+                    if lastbidsec <= 10:
+                        ordtype = 0
+                        print("급격하락 10초 딜레이")
+                    else:
+                        ordtype = 3
                 else:
                     ordtype = 0 # 기타
                 trsets = setdetail(setup[8]) #상세 투자 설정
