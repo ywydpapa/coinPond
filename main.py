@@ -13,7 +13,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241029001
+mainver = 241030001
 
 
 def loadmyset(uno):
@@ -332,17 +332,19 @@ def mainService(svrno):
                         lastbidsec = (nowt - last).seconds
                     if order["side"] == "bid":
                         cntbid = cntbid + 1
-                norasset = [1, 3, 7, 15, 31, 63, 127, 255, 511, 1023]
+                norasset = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
                 cntpost = 0 #매수 회차 산출 프로세스
+                amt = 0
                 for order in myorders:
                     if order['side'] == 'ask':
                         amt = float(order['volume']) * float(order['price'])
                         print("기존 투입 금액 ", amt)
-                        cnt = round(amt / float(setup[2]))
+                        addamt = float(amt) + float(setup[2]) #회차 계산용 금액 투입금액 플러스
+                        cnt = round(addamt / float(setup[2]))
                         print("산출 배수 ", cnt)
                         if cnt not in norasset:  # 목록에 없을 경우
                             for i in norasset:
-                                if cnt > i:
+                                if cnt >= i:
                                     cntpost += 1
                         else:
                             cntpost = norasset.index(cnt) + 1
@@ -355,7 +357,7 @@ def mainService(svrno):
                     holdstat = "N"
                 # 주문 확인
                 bidprice = 0
-                bidprice = float(setup[2])*2**(cntpost)
+                bidprice = float(setup[2])+float(amt)
                 print("다음 매수 금액 : ",bidprice)
                 #다음 투자금 확인
                 ordtype = 0
@@ -370,6 +372,12 @@ def mainService(svrno):
                         print("급격하락 10초 딜레이")
                     else:
                         ordtype = 3
+                    if holdstat == "Y":
+                        if lastbidsec <= 300:
+                            ordtype = 0
+                            print("홀드 설정에 의한 5분 딜레이")
+                        else:
+                            ordtype = 3
                 else:
                     ordtype = 0 # 기타
                 trsets = setdetail(setup[8]) #상세 투자 설정
@@ -385,9 +393,15 @@ def mainService(svrno):
                 print("설정금액",bidprice)
                 print("설정간격", bidintv)
                 print("설정이윤", bidmargin)
+                if myrestvcoin != 0:
+                    print("잔여 코인 존재: ", myrestvcoin)
+                    order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
+                    print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 매도 재주문")
+                    print("------------------------")
+                    continue
                 if ordtype == 1:
                     print("주문실행 설정", ordtype)
-                    first_trade(keys[0], keys[1], coinn,bidprice, bidintv, bidmargin,uno)
+                    first_trade(keys[0], keys[1], coinn,bidprice, bidintv, bidmargin, uno)
                 elif ordtype == 2:
                     print("주문실행 설정", ordtype)
                     canclebidorder(keys[0], keys[1], coinn, uno)
@@ -400,12 +414,6 @@ def mainService(svrno):
                         print("현금 부족으로 주문 패스 (보유현금 :",mywon,")")
                 else:
                     print("해당 주문 설정 없음")
-                # 주문 실행
-                if myrestvcoin != 0:
-                    print("잔여 코인 존재: ", myrestvcoin)
-                    order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
-                # 주문 수정
-
                 # 주문 기록
                 print("사용자 ",setup[1],"설정번호 ",setup[0]," 코인 ",setup[6], " 종료")
                 print("------------------------")
