@@ -359,10 +359,12 @@ def mainService(svrno):
                         last = last[:-6]
                         last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
                         lastbidsec = (nowt - last).seconds
-                    if order["side"] == "bid":
+                    elif order["side"] == "bid":
                         cntbid = cntbid + 1
                 norasset = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
                 cntpost = 0 #매수 회차 산출 프로세스
+                print("매도주문수 ", cntask)
+                print("매수주문수 ", cntbid)
                 amt = 0
                 calamt = 0
                 for order in myorders:
