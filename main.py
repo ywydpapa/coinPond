@@ -13,7 +13,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241030001
+mainver = 241031001
 
 
 def loadmyset(uno):
@@ -413,7 +413,7 @@ def mainService(svrno):
                     else:
                         print("현금 부족으로 주문 패스 (보유현금 :",mywon,")")
                 else:
-                    print("해당 주문 설정 없음")
+                    print("이번 회차 주문 설정 없음")
                 # 주문 기록
                 print("사용자 ",setup[1],"설정번호 ",setup[0]," 코인 ",setup[6], " 종료")
                 print("------------------------")
@@ -569,7 +569,7 @@ while True:
             msg = "메인 while 반복문 에러 : "+str(e)
             send_error(msg, uno)
         finally:
-            if cnt > 3600:  # 1시간 마다 재시작
+            if cnt > 1800:  # 0.5시간 마다 재시작
                 cnt = 1
                 service_restart()
         time.sleep(1)
