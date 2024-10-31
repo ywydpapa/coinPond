@@ -364,13 +364,15 @@ def mainService(svrno):
                 norasset = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
                 cntpost = 0 #매수 회차 산출 프로세스
                 amt = 0
+                calamt = 0
                 for order in myorders:
                     if order['side'] == 'ask':
                         amt = float(order['volume']) * float(order['price'])
-                        print("기존 투입 금액 ", amt)
+                        print("기존 매도 금액 ", amt)
                         addamt = float(amt) + float(setup[2]) #회차 계산용 금액 투입금액 플러스
                         cnt = round(addamt / float(setup[2]))
                         print("산출 배수 ", cnt)
+                        calamt = cnt * int(setup[2])
                         if cnt not in norasset:  # 목록에 없을 경우
                             for i in norasset:
                                 if cnt >= i:
@@ -386,7 +388,7 @@ def mainService(svrno):
                     holdstat = "N"
                 # 주문 확인
                 bidprice = 0
-                bidprice = float(setup[2])+float(amt)
+                bidprice = cnt * int(setup[2])
                 print("다음 매수 금액 : ",bidprice)
                 #다음 투자금 확인
                 ordtype = 0
