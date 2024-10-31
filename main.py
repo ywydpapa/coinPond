@@ -146,7 +146,7 @@ def calprice2(bidprice, uno):
         elif 1000 <= bidprice < 10000:
             bidprice = round(bidprice)
         elif 100 <= bidprice < 1000:
-            bidprice = round(bidprice, 1)
+            bidprice = round(bidprice)
         elif 10 <= bidprice < 100:
             bidprice = round(bidprice, 2)
         elif 1 <= bidprice < 10:
