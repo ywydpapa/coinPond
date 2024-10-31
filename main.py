@@ -316,7 +316,7 @@ def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
 
 
 def mainService(svrno):
-    global uno
+    global uno, cnt
     users =  dbconn.getsetonsvr(svrno)
     try:
         for user in users:
@@ -336,6 +336,7 @@ def mainService(svrno):
                 myrestvcoin = 0 #잔여 코인
                 bidprice = 0
                 amt = 0
+                cnt = 0
                 calamt = 0
                 ordtype = 0 #주문 종류
                 for coin in mycoins:
@@ -375,7 +376,7 @@ def mainService(svrno):
                         amt = float(order['volume']) * float(order['price'])
                         print("기존 매도 금액 ", amt)
                         addamt = float(amt) + float(setup[2]) #회차 계산용 금액 투입금액 플러스
-                        cnt = round(addamt / float(setup[2]))
+                        cnt = round(addamt / float(setup[2])) #회차 계산
                         print("산출 배수 ", cnt)
                         calamt = cnt * int(setup[2])
                         if cnt not in norasset:  # 목록에 없을 경우
@@ -392,11 +393,9 @@ def mainService(svrno):
                 else:
                     holdstat = "N"
                 # 주문 확인
-                bidprice = cnt * int(setup[2])
-                print("다음 매수 금액 : ",bidprice)
-                #다음 투자금 확인
                 if cntask == 0 and cntbid == 0:  #신규주문
                     ordtype = 1
+                    cnt = 1
                 elif cntask ==0 and cntbid !=0:  #매도후 매수취소
                     ordtype = 2
                 elif cntask !=0 and cntbid ==0:  #추가 매수 진행
@@ -414,6 +413,9 @@ def mainService(svrno):
                             ordtype = 3
                 else:
                     ordtype = 0 # 기타
+                bidprice = cnt * int(setup[2])
+                print("다음 매수 금액 : ",bidprice)
+                #다음 투자금 확인
                 trsets = setdetail(setup[8]) #상세 투자 설정
                 intvset = trsets[4:13] #투자설정 간격
                 marginset = trsets[14:23] #투자설정 이율
