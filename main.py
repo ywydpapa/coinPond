@@ -13,7 +13,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241031001
+mainver = 241031003
 
 
 def loadmyset(uno):
@@ -440,7 +440,7 @@ def mainService(svrno):
                     continue
                 if ordtype == 1:
                     print("주문실행 설정", ordtype)
-                    first_trade(keys[0], keys[1], coinn,bidprice, bidintv, bidmargin, uno)
+                    first_trade(keys[0], keys[1], coinn, bidprice, bidintv, bidmargin, uno)
                 elif ordtype == 2:
                     print("주문실행 설정", ordtype)
                     canclebidorder(keys[0], keys[1], coinn, uno)
