@@ -13,7 +13,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241031003
+mainver = 241031005
 
 
 def loadmyset(uno):
@@ -337,6 +337,7 @@ def mainService(svrno):
                 bidprice = 0
                 amt = 0
                 cnt = 0
+                cntb = 0
                 calamt = 0
                 ordtype = 0 #주문 종류
                 for coin in mycoins:
@@ -377,7 +378,7 @@ def mainService(svrno):
                         print("기존 매도 금액 ", amt)
                         addamt = float(amt) + float(setup[2]) #회차 계산용 금액 투입금액 플러스
                         cnt = round(addamt / float(setup[2])) #회차 계산
-                        print("산출 배수 ", cnt)
+                        print("매도량 산출 배수 ", cnt)
                         calamt = cnt * int(setup[2])
                         if cnt not in norasset:  # 목록에 없을 경우
                             for i in norasset:
@@ -385,6 +386,12 @@ def mainService(svrno):
                                     cntpost += 1
                         else:
                             cntpost = norasset.index(cnt) + 1
+                    if order['side'] == 'bid':
+                        amtb = float(order['volume']) * float(order['price'])
+                        print("기존 매수 주문 금액 ", amtb)
+                        addamtb = float(amtb) + float(setup[2])
+                        cntb = round(addamtb / float(setup[2]))
+                        print("매수량 산출 배수 ", cntb)
                 print("산출 회차 ", cntpost)
                 print("직전 주문 경과시간 ",lastbidsec,"초")
                 holdstat = ""
@@ -413,7 +420,7 @@ def mainService(svrno):
                             ordtype = 3
                 else:
                     ordtype = 0 # 기타
-                bidprice = cnt * int(setup[2])
+                bidprice = round(amtb * 2)
                 print("다음 매수 금액 : ",bidprice)
                 #다음 투자금 확인
                 trsets = setdetail(setup[8]) #상세 투자 설정
