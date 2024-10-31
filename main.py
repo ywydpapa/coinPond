@@ -1,4 +1,5 @@
 import time
+from contextlib import nullcontext
 from datetime import datetime
 from pyupbit import Upbit
 import dbconn
@@ -336,6 +337,7 @@ def mainService(svrno):
                 myrestvcoin = 0 #잔여 코인
                 bidprice = 0
                 amt = 0
+                amtb = 0
                 cnt = 0
                 cntb = 0
                 calamt = 0
@@ -368,10 +370,15 @@ def mainService(svrno):
                         lastbidsec = (nowt - last).seconds
                     elif order["side"] == "bid":
                         cntbid = cntbid + 1
-                norasset = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+                norasset = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
                 cntpost = 0 #매수 회차 산출 프로세스
-                print("매도주문수 ", cntask)
-                print("매수주문수 ", cntbid)
+                if globals()['stepcnt_{}'.format(setup[0])] == 0:
+                    globals()['askcnt_{}'.format(setup[0])] = cntask
+                    globals()['bidcnt_{}'.format(setup[0])] = cntbid
+                print("이전 매도주문수 ", globals()['askcnt_{}'.format(setup[0])])
+                print("현재 매도주문수 ", cntask)
+                print("이전 매도주문수 ", globals()['bidcnt_{}'.format(setup[0])])
+                print("현재 매수주문수 ", cntbid)
                 for order in myorders:
                     if order['side'] == 'ask':
                         amt = float(order['volume']) * float(order['price'])
@@ -385,14 +392,20 @@ def mainService(svrno):
                                 if cnt >= i:
                                     cntpost += 1
                         else:
-                            cntpost = norasset.index(cnt) + 1
-                    if order['side'] == 'bid':
+                            cntpost = norasset.index(cnt)
+                    elif order['side'] == 'bid':
                         amtb = float(order['volume']) * float(order['price'])
                         print("기존 매수 주문 금액 ", amtb)
                         addamtb = float(amtb) + float(setup[2])
                         cntb = round(addamtb / float(setup[2]))
                         print("매수량 산출 배수 ", cntb)
-                print("산출 회차 ", cntpost)
+                    else:
+                        amtb =float(setup[2])
+                        print("기존 매도매수 없음")
+                if amtb == 0:
+                    amtb = float(setup[2]/2)
+                print("현재 산출 회차 단계", cntpost)
+                print("이전 산출 회차 단계", globals()['stepcnt_{}'.format(setup[0])])
                 print("직전 주문 경과시간 ",lastbidsec,"초")
                 holdstat = ""
                 if holdcnt <= cntpost:
@@ -442,20 +455,27 @@ def mainService(svrno):
                 if myrestvcoin != 0:
                     print("잔여 코인 존재: ", myrestvcoin)
                     order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
+                    globals()['askcnt_{}'.format(setup[0])] = 1
                     print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 매도 재주문")
                     print("------------------------")
                     continue
                 if ordtype == 1:
                     print("주문실행 설정", ordtype)
                     first_trade(keys[0], keys[1], coinn, bidprice, bidintv, bidmargin, uno)
+                    globals()['askcnt_{}'.format(setup[0])] = 1
+                    globals()['bidcnt_{}'.format(setup[0])] = 1
+                    globals()['stepcnt_{}'.format(setup[0])] = 2  # 거래단계 수
                 elif ordtype == 2:
                     print("주문실행 설정", ordtype)
                     canclebidorder(keys[0], keys[1], coinn, uno)
+                    globals()['stepcnt_{}'.format(setup[0])] = 1
                 elif ordtype == 3:
                     print("주문실행 설정", ordtype)
                     #보유 현금이 충분할 경우만 실행
                     if mywon >= bidprice:
                         add_new_bid(keys[0],keys[1],coinn,bideaprice,bidvolume,uno)
+                        globals()['stepcnt_{}'.format(setup[0])] = globals()['stepcnt_{}'.format(setup[0])] + 1 # 거래단계 수
+                        globals()['bidcnt_{}'.format(setup[0])] = 1
                     else:
                         print("현금 부족으로 주문 패스 (보유현금 :",mywon,")")
                 else:
@@ -602,6 +622,13 @@ def check_holdstart(min,uno,coinn): # 홀드시작이후 시간 체크
 
 cnt = 1
 setons = dbconn.getseton()
+users = dbconn.getsetonsvr(svrno)
+for user in users:
+    setups = dbconn.getmsetup(user)
+    for setup in setups:
+        globals()['askcnt_{}'.format(setup[0])] = 0  # 매도거래 수
+        globals()['bidcnt_{}'.format(setup[0])] = 0  # 매수거래 수
+        globals()['stepcnt_{}'.format(setup[0])] = 0  # 거래단계 수
 service_start() # 시작시간 기록
 while True:
     print("구동 횟수 : ", cnt)
