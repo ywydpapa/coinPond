@@ -91,7 +91,7 @@ def checktraded(key1, key2, coinn, uno):
         for wallet in checktrad:
             if "KRW-" + wallet['currency'] == coinn:
                 if float(wallet['balance']) != 0.0:
-                    print("잔고 남아 재거래 실행")
+                    print("잔고 남아 재거래 실행 설정")
                 else:
                     print('매도 거래 대기중')
                 return wallet
@@ -303,6 +303,7 @@ def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
         setprice = calprice(setprice, uno)
         setvolume = traded['balance']
         selllimitpr(key1, key2, coinn, setprice, setvolume, uno)
+        print("1단계 매도 실행 완료")
     # 추가 예약 매수 실행
         bidprice = ((preprice * 100) - (preprice * intergap)) / 100
         bidprice = calprice(bidprice, uno)
@@ -333,6 +334,10 @@ def mainService(svrno):
                 myvcoin = 0 #보유 코인
                 vcoinprice = 0 #코인 평균 구매가
                 myrestvcoin = 0 #잔여 코인
+                bidprice = 0
+                amt = 0
+                calamt = 0
+                ordtype = 0 #주문 종류
                 for coin in mycoins:
                     if coin["currency"] == "KRW":
                         mywon = float(coin["balance"]) - float(coin["locked"])
@@ -365,8 +370,6 @@ def mainService(svrno):
                 cntpost = 0 #매수 회차 산출 프로세스
                 print("매도주문수 ", cntask)
                 print("매수주문수 ", cntbid)
-                amt = 0
-                calamt = 0
                 for order in myorders:
                     if order['side'] == 'ask':
                         amt = float(order['volume']) * float(order['price'])
@@ -389,11 +392,9 @@ def mainService(svrno):
                 else:
                     holdstat = "N"
                 # 주문 확인
-                bidprice = 0
                 bidprice = cnt * int(setup[2])
                 print("다음 매수 금액 : ",bidprice)
                 #다음 투자금 확인
-                ordtype = 0
                 if cntask == 0 and cntbid == 0:  #신규주문
                     ordtype = 1
                 elif cntask ==0 and cntbid !=0:  #매도후 매수취소
