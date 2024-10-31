@@ -316,7 +316,7 @@ def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
 
 
 def mainService(svrno):
-    global uno, cnt
+    global uno
     users =  dbconn.getsetonsvr(svrno)
     try:
         for user in users:
