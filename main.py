@@ -117,7 +117,36 @@ def calprice(bidprice, uno):
         elif 1000 <= bidprice < 10000:
             bidprice = round(bidprice)
         elif 100 <= bidprice < 1000:
+            bidprice = round(bidprice, 1)
+        elif 10 <= bidprice < 100:
+            bidprice = round(bidprice, 2)
+        elif 1 <= bidprice < 10:
+            bidprice = round(bidprice, 3)
+        else:
+            bidprice = round(bidprice, 4)
+    except Exception as e:
+        msg = "주문 가격 산출 에러 " + str(e)
+        send_error(msg, uno)
+    finally:
+        return bidprice
+
+
+def calprice2(bidprice, uno):
+    try:
+        if bidprice >= 2000000:
+            bidprice = round(bidprice, -3)
+        elif 1000000 <= bidprice < 20000000:
+            bidprice = round(bidprice, -3) + 500
+        elif 500000 <= bidprice < 1000000:
+            bidprice = round(bidprice, -2)
+        elif 100000 <= bidprice < 500000:
+            bidprice = round(bidprice, -2) + 50
+        elif 10000 <= bidprice < 100000:
+            bidprice = round(bidprice, -1)
+        elif 1000 <= bidprice < 10000:
             bidprice = round(bidprice)
+        elif 100 <= bidprice < 1000:
+            bidprice = round(bidprice, 1)
         elif 10 <= bidprice < 100:
             bidprice = round(bidprice, 2)
         elif 1 <= bidprice < 10:
@@ -385,7 +414,10 @@ def mainService(svrno):
                 marginset = trsets[14:23] #투자설정 이율
                 bidintv = intvset[cntpost]
                 bidmargin = marginset[cntpost]
-                bideaprice = calprice(float(curprice*(1-bidintv/100)),uno) #목표 단가
+                if coinn in ["KRW-ADA", "KRW-ALGO", "KRW-BLUR", "KRW-CELO", "KRW-ELF", "KRW-EOS", "KRW-GRS", "KRW-GRT", "KRW-ICX", "KRW-MANA", "KRW-MINA", "KRW-POL", "KRW-SAND", "KRW-SEI", "KRW-STG", "KRW-TRX"]:
+                    bideaprice = calprice2(float(curprice * (1 - bidintv / 100)),uno) #목표 단가
+                else:
+                    bideaprice = calprice(float(curprice * (1 - bidintv / 100)), uno)  # 목표 단가
                 bidvolume = float(bidprice)/float(bideaprice)
                 print("매수설정단가 ", bideaprice)
                 print("매수설정개수 ", bidvolume)
