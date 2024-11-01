@@ -339,6 +339,7 @@ def mainService(svrno):
                 amt = 0
                 amtb = 0
                 addamt = 0
+                addamtb = 0
                 cnt = 0
                 cntb = 0
                 calamt = 0
@@ -405,11 +406,9 @@ def mainService(svrno):
                 if amt == 0:
                     amt = float(setup[2])
                 if amtb == 0:
-                    amtb = amt + float(setup[2])
+                    amtb = 0
                 if addamt == 0:
                     addamt = float(setup[2])
-                if amtb != 0: #기존 매수금액 존재시
-                    addamt = amtb + amt + float(setup[2])
                 print("현재 산출 회차 단계", cntpost)
                 print("직전 주문 경과시간 ",lastbidsec,"초")
                 holdstat = ""
