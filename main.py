@@ -406,7 +406,10 @@ def mainService(svrno):
                     amtb = float(setup[2])
                 if amt == 0:
                     amt = float(setup[2])
-                    addamt = float(setup[2])*2
+                if addamt == 0:
+                    addamt = float(setup[2])
+                if amtb != 0:
+                    addamt = amtb + amt + float(setup[2])
                 print("현재 산출 회차 단계", cntpost)
                 print("직전 주문 경과시간 ",lastbidsec,"초")
                 holdstat = ""
@@ -618,26 +621,17 @@ def check_holdstart(min,uno,coinn): # 홀드시작이후 시간 체크
 
 
 cnt = 1
-setons = dbconn.getseton()
-users = dbconn.getsetonsvr(svrno)
-for user in users:
-    setups = dbconn.getmsetup(user)
-    for setup in setups:
-        globals()['bidamt_{}'.format(setup[0])] = 0  # 거래단계 수
 service_start() # 시작시간 기록
 while True:
     print("구동 횟수 : ", cnt)
-    for seton in setons:
-        try:
-            mainService(svrno)
-            cnt = cnt + 1
-        except Exception as e:
-            myset = loadmyset(seton)
-            uno = myset[1]
-            msg = "메인 while 반복문 에러 : "+str(e)
-            send_error(msg, uno)
-        finally:
-            if cnt > 1200:  # 0.5시간 마다 재시작
-                cnt = 1
-                service_restart()
-        time.sleep(1)
+    try:
+        mainService(svrno)
+        cnt = cnt + 1
+    except Exception as e:
+        msg = "메인 while 반복문 에러 : "+str(e)
+        send_error(msg, 0 )
+    finally:
+        if cnt > 1200:  # 0.5시간 마다 재시작
+            cnt = 1
+            service_restart()
+    time.sleep(1)
