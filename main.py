@@ -646,7 +646,7 @@ while True:
             msg = "메인 while 반복문 에러 : "+str(e)
             send_error(msg, uno)
         finally:
-            if cnt > 1800:  # 0.5시간 마다 재시작
+            if cnt > 1200:  # 0.5시간 마다 재시작
                 cnt = 1
                 service_restart()
         time.sleep(1)
