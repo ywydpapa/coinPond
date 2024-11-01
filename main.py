@@ -401,15 +401,14 @@ def mainService(svrno):
                         cntb = round(addamtb / float(setup[2]))
                         print("매수량 산출 배수 ", cntb)
                     else:
-                        amtb =float(setup[2])
-                        print("기존 매도매수 없음")
-                if amtb == 0:
-                    amtb = float(setup[2])
+                        print("기존 매수 없음")
                 if amt == 0:
                     amt = float(setup[2])
+                if amtb == 0:
+                    amtb = amt + float(setup[2])
                 if addamt == 0:
                     addamt = float(setup[2])
-                if amtb != 0:
+                if amtb != 0: #기존 매수금액 존재시
                     addamt = amtb + amt + float(setup[2])
                 print("현재 산출 회차 단계", cntpost)
                 print("직전 주문 경과시간 ",lastbidsec,"초")
