@@ -322,7 +322,7 @@ def mainService(svrno):
     try:
         for user in users:
             setups = dbconn.getmsetup(user)
-            for setup in setups: #(471, 18, 20000.0, 9, 1.0, 0.5, 'KRW-ZETA', 'Y', '43', 21, 'N', 6, 'N', datetime.datetime(2024, 10, 21, 9, 35, 4), '100001000010000')
+            for setup in setups: #(471, 18, 20000.0, 9, 1.0, 0.5, 'KRW-ZETA', 'Y', '43', 21, 'N', 6, 'N')
                 if setup[7]!="Y":
                     continue #구동중이지 않은 경우 통과
                 uno = setup[1]
@@ -498,7 +498,6 @@ def mainService(svrno):
         print('서비스 버전', mainver)
         print('$$$$$$$$$$$$$$$$$$$')
         dbconn.clearcache()  # 캐쉬 삭제
-
 
 
 def service_restart():
