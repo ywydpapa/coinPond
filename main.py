@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241031005
+mainver = 241101001
 
 
 def loadmyset(uno):
@@ -359,17 +359,21 @@ def mainService(svrno):
                 cntask = 0 #매도 주문수
                 cntbid = 0 #매수 주문수
                 lastbidsec = 0
-                for order in myorders:
-                    nowt = datetime.now()
-                    if order["side"] == "ask":
-                        cntask = cntask + 1
-                        last = order["created_at"]
-                        last = last.replace("T", " ")
-                        last = last[:-6]
-                        last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
-                        lastbidsec = (nowt - last).seconds
-                    elif order["side"] == "bid":
-                        cntbid = cntbid + 1
+                if myorders is not None:
+                    for order in myorders:
+                        nowt = datetime.now()
+                        if order["side"] == "ask":
+                            cntask = cntask + 1
+                            last = order["created_at"]
+                            last = last.replace("T", " ")
+                            last = last[:-6]
+                            last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+                            lastbidsec = (nowt - last).seconds
+                        elif order["side"] == "bid":
+                            cntbid = cntbid + 1
+                else:
+                    cntask = 0
+                    cntbid = 0
                 norasset = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
                 cntpost = 0 #매수 회차 산출 프로세스
                 if globals()['stepcnt_{}'.format(setup[0])] == 0:
