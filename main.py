@@ -356,6 +356,7 @@ def mainService(svrno):
                 coinn = "KRW-"+vcoin
                 curprice = pyupbit.get_current_price(coinn)
                 print("코인 현재 시장가", curprice)
+                print("최초 매수 설정 금액 ", setup[2] )
                 myorders = upbit.get_order(coinn, state='wait')
                 cntask = 0 #매도 주문수
                 cntbid = 0 #매수 주문수
@@ -438,8 +439,10 @@ def mainService(svrno):
                             ordtype = 3
                 else:
                     ordtype = 0 # 기타
-
-                bidprice = round(addamt/float(setup[2]))*float(setup[2])
+                if cntbid == 0 and cntask == 0:
+                    bidprice = float(setup[2])
+                else:
+                    bidprice = round(addamt / float(setup[2])) * float(setup[2])
                 print("다음 매수 금액 : ",bidprice)
                 #다음 투자금 확인
                 trsets = setdetail(setup[8]) #상세 투자 설정
