@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241101001
+mainver = 241101002
 
 
 def loadmyset(uno):
@@ -338,6 +338,7 @@ def mainService(svrno):
                 bidprice = 0
                 amt = 0
                 amtb = 0
+                addamt = 0
                 cnt = 0
                 cntb = 0
                 calamt = 0
@@ -376,12 +377,7 @@ def mainService(svrno):
                     cntbid = 0
                 norasset = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
                 cntpost = 0 #매수 회차 산출 프로세스
-                if globals()['stepcnt_{}'.format(setup[0])] == 0:
-                    globals()['askcnt_{}'.format(setup[0])] = cntask
-                    globals()['bidcnt_{}'.format(setup[0])] = cntbid
-                print("이전 매도주문수 ", globals()['askcnt_{}'.format(setup[0])])
                 print("현재 매도주문수 ", cntask)
-                print("이전 매도주문수 ", globals()['bidcnt_{}'.format(setup[0])])
                 print("현재 매수주문수 ", cntbid)
                 for order in myorders:
                     if order['side'] == 'ask':
@@ -407,9 +403,11 @@ def mainService(svrno):
                         amtb =float(setup[2])
                         print("기존 매도매수 없음")
                 if amtb == 0:
-                    amtb = float(setup[2]/2)
+                    amtb = float(setup[2])
+                if amt == 0:
+                    amt = float(setup[2])
+                    addamt = float(setup[2])*2
                 print("현재 산출 회차 단계", cntpost)
-                print("이전 산출 회차 단계", globals()['stepcnt_{}'.format(setup[0])])
                 print("직전 주문 경과시간 ",lastbidsec,"초")
                 holdstat = ""
                 if holdcnt <= cntpost:
@@ -437,7 +435,8 @@ def mainService(svrno):
                             ordtype = 3
                 else:
                     ordtype = 0 # 기타
-                bidprice = round(amtb * 2)
+
+                bidprice = round(addamt/float(setup[2]))*float(setup[2])
                 print("다음 매수 금액 : ",bidprice)
                 #다음 투자금 확인
                 trsets = setdetail(setup[8]) #상세 투자 설정
@@ -466,20 +465,14 @@ def mainService(svrno):
                 if ordtype == 1:
                     print("주문실행 설정", ordtype)
                     first_trade(keys[0], keys[1], coinn, bidprice, bidintv, bidmargin, uno)
-                    globals()['askcnt_{}'.format(setup[0])] = 1
-                    globals()['bidcnt_{}'.format(setup[0])] = 1
-                    globals()['stepcnt_{}'.format(setup[0])] = 2  # 거래단계 수
                 elif ordtype == 2:
                     print("주문실행 설정", ordtype)
                     canclebidorder(keys[0], keys[1], coinn, uno)
-                    globals()['stepcnt_{}'.format(setup[0])] = 1
                 elif ordtype == 3:
                     print("주문실행 설정", ordtype)
                     #보유 현금이 충분할 경우만 실행
                     if mywon >= bidprice:
                         add_new_bid(keys[0],keys[1],coinn,bideaprice,bidvolume,uno)
-                        globals()['stepcnt_{}'.format(setup[0])] = globals()['stepcnt_{}'.format(setup[0])] + 1 # 거래단계 수
-                        globals()['bidcnt_{}'.format(setup[0])] = 1
                     else:
                         print("현금 부족으로 주문 패스 (보유현금 :",mywon,")")
                 else:
@@ -630,9 +623,7 @@ users = dbconn.getsetonsvr(svrno)
 for user in users:
     setups = dbconn.getmsetup(user)
     for setup in setups:
-        globals()['askcnt_{}'.format(setup[0])] = 0  # 매도거래 수
-        globals()['bidcnt_{}'.format(setup[0])] = 0  # 매수거래 수
-        globals()['stepcnt_{}'.format(setup[0])] = 0  # 거래단계 수
+        globals()['bidamt_{}'.format(setup[0])] = 0  # 거래단계 수
 service_start() # 시작시간 기록
 while True:
     print("구동 횟수 : ", cnt)
