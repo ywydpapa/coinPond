@@ -495,6 +495,7 @@ def mainService(svrno):
         print('$$$$$$$$$$$$$$$$$$$')
         print('거래점검 시간', ntime)
         print('점검 서버', svrno)
+        print('서비스 버전', mainver)
         print('$$$$$$$$$$$$$$$$$$$')
         dbconn.clearcache()  # 캐쉬 삭제
 
