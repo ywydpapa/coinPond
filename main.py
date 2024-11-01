@@ -462,7 +462,6 @@ def mainService(svrno):
                 if myrestvcoin != 0:
                     print("잔여 코인 존재: ", myrestvcoin)
                     order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
-                    globals()['askcnt_{}'.format(setup[0])] = 1
                     print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 매도 재주문")
                     print("------------------------")
                     continue
