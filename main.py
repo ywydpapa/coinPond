@@ -57,7 +57,7 @@ def selllimitpr(key1, key2, coinn, setpr, setvol, uno):
     try:
         upbit = pyupbit.Upbit(key1, key2)
         orders = upbit.sell_limit_order(coinn, setpr, setvol)
-        print(orders)
+        print("지정가 매도 주문 내용 : ",orders)
         if orders is not None:
             ldata01 = datetime.now()
             ldata02 = orders["uuid"]
@@ -208,7 +208,11 @@ def order_mod_ask5(key1, key2, coinn, profit, uno):  #이윤 변동식 계산 �
         print(totalamt)
         print(totalvol)
         setprice = totalamt / totalvol
-        setprice = calprice(setprice, uno)
+        if coinn in ["KRW-ADA", "KRW-ALGO", "KRW-BLUR", "KRW-CELO", "KRW-ELF", "KRW-EOS", "KRW-GRS", "KRW-GRT",
+                     "KRW-ICX", "KRW-MANA", "KRW-MINA", "KRW-POL", "KRW-SAND", "KRW-SEI", "KRW-STG", "KRW-TRX"]:
+            setprice = calprice2(setprice, uno)
+        else:
+            setprice = calprice(setprice, uno)
         selllimitpr(key1, key2, coinn, setprice, totalvol, uno)
         # 새로운 매도 주문
     except Exception as e:
@@ -301,13 +305,21 @@ def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
         print("1단계 매수내역 :", buyrest)
         traded = checktraded(key1, key2, coinn, uno)  # 설정 코인 지갑내 존재 확인
         setprice = float(traded["avg_buy_price"]) * (1.0 + (profit / 100.0))
-        setprice = calprice(setprice, uno)
+        if coinn in ["KRW-ADA", "KRW-ALGO", "KRW-BLUR", "KRW-CELO", "KRW-ELF", "KRW-EOS", "KRW-GRS", "KRW-GRT",
+                     "KRW-ICX", "KRW-MANA", "KRW-MINA", "KRW-POL", "KRW-SAND", "KRW-SEI", "KRW-STG", "KRW-TRX"]:
+            setprice = calprice2(setprice, uno)
+        else:
+            setprice = calprice(setprice, uno)
         setvolume = traded['balance']
         selllimitpr(key1, key2, coinn, setprice, setvolume, uno)
         print("1단계 매도 실행 완료")
     # 추가 예약 매수 실행
         bidprice = ((preprice * 100) - (preprice * intergap)) / 100
-        bidprice = calprice(bidprice, uno)
+        if coinn in ["KRW-ADA", "KRW-ALGO", "KRW-BLUR", "KRW-CELO", "KRW-ELF", "KRW-EOS", "KRW-GRS", "KRW-GRT",
+                     "KRW-ICX", "KRW-MANA", "KRW-MINA", "KRW-POL", "KRW-SAND", "KRW-SEI", "KRW-STG", "KRW-TRX"]:
+            bidprice = calprice2(bidprice, uno)
+        else:
+            bidprice = calprice(bidprice, uno)
         bidasset = bidasset * 2
         preprice = bidprice  #현재가에 적용
         bidvol = bidasset / bidprice
