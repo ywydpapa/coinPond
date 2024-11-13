@@ -389,7 +389,7 @@ def mainService(svrno):
                 else:
                     cntask = 0
                     cntbid = 0
-                norasset = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+                norasset = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
                 cntpost = 0 #매수 회차 산출 프로세스
                 print("현재 매도주문수 ", cntask)
                 print("현재 매수주문수 ", cntbid)
@@ -458,8 +458,13 @@ def mainService(svrno):
                 trsets = setdetail(setup[8]) #상세 투자 설정
                 intvset = trsets[4:13] #투자설정 간격
                 marginset = trsets[14:23] #투자설정 이율
-                bidintv = intvset[cntpost]
-                bidmargin = marginset[cntpost]
+                if cntpost >= setup[3]:
+                    print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 설정치 초과 통과")
+                    print("------------------------")
+                    continue
+                else:
+                    bidintv = intvset[cntpost]
+                    bidmargin = marginset[cntpost]
                 if coinn in ["KRW-ADA", "KRW-ALGO", "KRW-BLUR", "KRW-CELO", "KRW-ELF", "KRW-EOS", "KRW-GRS", "KRW-GRT", "KRW-ICX", "KRW-MANA", "KRW-MINA", "KRW-POL", "KRW-SAND", "KRW-SEI", "KRW-STG", "KRW-TRX"]:
                     bideaprice = calprice2(float(curprice * (1 - bidintv / 100)),uno) #목표 단가
                 else:
