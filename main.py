@@ -334,11 +334,13 @@ def mainService(svrno):
     try:
         for user in users:
             setups = dbconn.getmsetup(user)
-            for setup in setups: #(471, 18, 20000.0, 9, 1.0, 0.5, 'KRW-ZETA', 'Y', '43', 21, 'N', 6, 'N')
+            for setup in setups: #(658,	23,	10000.0, 9,	1.0, 0.5, KRW-ZETA,	Y, 42, 21, N, 6, N, N, 1000000.0)
                 if setup[7]!="Y":
                     continue #구동중이지 않은 경우 통과
                 uno = setup[1]
                 holdcnt = setup[11]
+                amtlimityn = setup[13]
+                amtlimit = setup[14]
                 vcoin = setup[6][4:] #코인명
                 keys = dbconn.getupbitkey(uno) # 키를 받아 오기
                 upbit = pyupbit.Upbit(keys[0], keys[1])
@@ -476,6 +478,7 @@ def mainService(svrno):
                 print("설정금액",bidprice)
                 print("설정간격", bidintv)
                 print("설정이윤", bidmargin)
+                print("구매한계 금액", amtlimit)
                 if myrestvcoin != 0:
                     print("잔여 코인 존재: ", myrestvcoin)
                     order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
