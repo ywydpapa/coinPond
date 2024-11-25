@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241113002
+mainver = 241125001
 
 
 def loadmyset(uno):
@@ -464,6 +464,7 @@ def mainService(svrno):
                     print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 설정치 초과 통과")
                     print("------------------------")
                     continue
+                    time.sleep(0.3)
                 else:
                     bidintv = intvset[cntpost]
                     bidmargin = marginset[cntpost]
@@ -485,6 +486,7 @@ def mainService(svrno):
                     print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 매도 재주문")
                     print("------------------------")
                     continue
+                    time.sleep(0.3)
                 if ordtype == 1:
                     print("주문실행 설정", ordtype)
                     first_trade(keys[0], keys[1], coinn, bidprice, bidintv, bidmargin, uno)
@@ -503,6 +505,7 @@ def mainService(svrno):
                 # 주문 기록
                 print("사용자 ",setup[1],"설정번호 ",setup[0]," 코인 ",setup[6], " 종료")
                 print("------------------------")
+                time.sleep(0.3)
     except Exception as e:
         msg = "메인 루프 에러 :" + str(e)
         send_error(msg, uno)
@@ -654,4 +657,3 @@ while True:
         if cnt > 1200:  # 0.5시간 마다 재시작
             cnt = 1
             service_restart()
-    time.sleep(1)
