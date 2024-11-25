@@ -360,7 +360,7 @@ def mainService(svrno):
                 ordtype = 0 #주문 종류
                 for coin in mycoins:
                     if coin["currency"] == "KRW":
-                        mywon = float(coin["balance"]) - float(coin["locked"])
+                        mywon = float(coin["balance"])
                         print("KRW", mywon)
                     if coin["currency"] == vcoin:
                         myvcoin = float(coin["balance"]) + float(coin["locked"])
