@@ -464,7 +464,7 @@ def mainService(svrno):
                     print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 설정치 초과 통과")
                     print("------------------------")
                     continue
-                    time.sleep(0.3)
+                    time.sleep(0.2)
                 else:
                     bidintv = intvset[cntpost]
                     bidmargin = marginset[cntpost]
@@ -486,7 +486,7 @@ def mainService(svrno):
                         print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 구매 한계 금액 도달 통과")
                         print("------------------------")
                         continue
-                        time.sleep(0.3)
+                        time.sleep(0.2)
                 else:
                     print("구매금액 설정 없음")
                 if myrestvcoin != 0:
@@ -495,7 +495,7 @@ def mainService(svrno):
                     print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 매도 재주문")
                     print("------------------------")
                     continue
-                    time.sleep(0.3)
+                    time.sleep(0.2)
                 if ordtype == 1:
                     print("주문실행 설정", ordtype)
                     first_trade(keys[0], keys[1], coinn, bidprice, bidintv, bidmargin, uno)
@@ -514,7 +514,7 @@ def mainService(svrno):
                 # 주문 기록
                 print("사용자 ",setup[1],"설정번호 ",setup[0]," 코인 ",setup[6], " 종료")
                 print("------------------------")
-                time.sleep(0.3)
+                time.sleep(0.2)
     except Exception as e:
         msg = "메인 루프 에러 :" + str(e)
         send_error(msg, uno)
