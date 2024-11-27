@@ -127,7 +127,7 @@ def setLog(uno):
                     else:
                         print("매수거래 패스")
     except Exception as e:
-        print("거래 기록 에러", e)
+        print("거래 기록 에러 ",e, "사용자 :", uno)
     finally:
         cur5.close()
         db5.close()
