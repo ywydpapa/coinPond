@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241125002
+mainver = 241127001
 
 
 def loadmyset(uno):
@@ -438,9 +438,9 @@ def mainService(svrno):
                     ordtype = 2
                 elif cntask !=0 and cntbid ==0:  #추가 매수 진행
                     #홀드 및 신호등 체크 !!!!!
-                    if lastbidsec <= 10:
+                    if lastbidsec <= 50:
                         ordtype = 0
-                        print("급격하락 10초 딜레이")
+                        print("급격하락 30초 딜레이")
                     else:
                         ordtype = 3
                     if holdstat == "Y":
@@ -460,7 +460,7 @@ def mainService(svrno):
                 trsets = setdetail(setup[8]) #상세 투자 설정
                 intvset = trsets[4:13] #투자설정 간격
                 marginset = trsets[14:23] #투자설정 이율
-                if cntpost >= setup[3]:
+                if cntpost > setup[3]:
                     print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 설정치 초과 통과")
                     print("------------------------")
                     continue
@@ -480,6 +480,15 @@ def mainService(svrno):
                 print("설정간격", bidintv)
                 print("설정이윤", bidmargin)
                 print("구매한계 금액", amtlimit)
+                if amtlimityn == "Y":
+                    activeamt = float(amt) + float(amtb)
+                    if activeamt >= amtlimit:
+                        print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 구매 한계 금액 도달 통과")
+                        print("------------------------")
+                        continue
+                        time.sleep(0.3)
+                else:
+                    print("구매금액 설정 없음")
                 if myrestvcoin != 0:
                     print("잔여 코인 존재: ", myrestvcoin)
                     order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
@@ -654,6 +663,6 @@ while True:
         msg = "메인 while 반복문 에러 : "+str(e)
         send_error(msg, 0 )
     finally:
-        if cnt > 1200:  # 0.5시간 마다 재시작
+        if cnt > 3600:  # 0.5시간 마다 재시작
             cnt = 1
             service_restart()
