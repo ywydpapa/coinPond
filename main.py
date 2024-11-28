@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241127001
+mainver = 241128001
 
 
 def loadmyset(uno):
@@ -438,15 +438,15 @@ def mainService(svrno):
                     ordtype = 2
                 elif cntask !=0 and cntbid ==0:  #추가 매수 진행
                     #홀드 및 신호등 체크 !!!!!
-                    if lastbidsec <= 50:
+                    if lastbidsec < 2:
                         ordtype = 0
                         print("급격하락 30초 딜레이")
                     else:
                         ordtype = 3
                     if holdstat == "Y":
-                        if lastbidsec <= 300:
+                        if lastbidsec <= 900:
                             ordtype = 0
-                            print("홀드 설정에 의한 5분 딜레이")
+                            print("홀드 설정에 의한 15분 딜레이")
                         else:
                             ordtype = 3
                 else:
@@ -514,7 +514,7 @@ def mainService(svrno):
                 # 주문 기록
                 print("사용자 ",setup[1],"설정번호 ",setup[0]," 코인 ",setup[6], " 종료")
                 print("------------------------")
-                time.sleep(0.2)
+                time.sleep(0.3)
     except Exception as e:
         msg = "메인 루프 에러 :" + str(e)
         send_error(msg, uno)
