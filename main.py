@@ -204,7 +204,7 @@ def order_mod_ask5(key1, key2, coinn, profit, uno):  #이윤 변동식 계산 �
         totalamt = (float(tradednew['balance']) + float(tradednew['locked'])) * float(tradednew['avg_buy_price'])  # 전체 구매 금액
         totalvol = float(tradednew['balance']) + float(tradednew['locked'])  # 전체 구매 수량
         totalamt = totalamt + (totalamt * profit / 100)
-        print("재설정 이윤 :", profit)
+        print("재설정 이윤 :", str(profit))
         print(totalamt)
         print(totalvol)
         setprice = totalamt / totalvol
@@ -295,7 +295,7 @@ def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
     try:
         bidasset = initAsset #매수 금액
         buyrest = buymarketpr(key1, key2, coinn, bidasset,uno)  # 첫번째 설정 구매
-        print("시장가 구매", buyrest)
+        print("시장가 구매", str(buyrest))
         time.sleep(1)
     except Exception as e:
         msg = '시장가 구매 에러 '+ str(e)
@@ -367,12 +367,12 @@ def mainService(svrno):
                             myvcoin = float(coin["balance"]) + float(coin["locked"])
                             myrestvcoin = float(coin["balance"])
                             vcoinprice = float(coin["avg_buy_price"])
-                            print(vcoin,":",myvcoin, "Price :", vcoinprice)
+                            print(str(vcoin),":",str(myvcoin), "Price :", str(vcoinprice))
                 # 지갑내용 받아오기 - 해당 코인만
                     coinn = "KRW-"+vcoin
                     curprice = pyupbit.get_current_price(coinn)
-                    print("코인 현재 시장가", curprice)
-                    print("최초 매수 설정 금액 ", setup[2] )
+                    print("코인 현재 시장가", str(curprice))
+                    print("최초 매수 설정 금액 ", str(setup[2]) )
                     myorders = upbit.get_order(coinn, state='wait')
                     cntask = 0 #매도 주문수
                     cntbid = 0 #매수 주문수
@@ -394,15 +394,15 @@ def mainService(svrno):
                         cntbid = 0
                     norasset = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
                     cntpost = 0 #매수 회차 산출 프로세스
-                    print("현재 매도주문수 ", cntask)
-                    print("현재 매수주문수 ", cntbid)
+                    print("현재 매도주문수 ", str(cntask))
+                    print("현재 매수주문수 ", str(cntbid))
                     for order in myorders:
                         if order['side'] == 'ask':
                             amt = float(order['volume']) * float(order['price'])
-                            print("기존 매도 금액 ", amt)
+                            print("기존 매도 금액 ", str(amt))
                             addamt = float(amt) + float(setup[2]) #회차 계산용 금액 투입금액 플러스
                             cnt = round(addamt / float(setup[2])) #회차 계산
-                            print("매도량 산출 배수 ", cnt)
+                            print("매도량 산출 배수 ", str(cnt))
                             calamt = cnt * int(setup[2])
                             if cnt not in norasset:  # 목록에 없을 경우
                                 for i in norasset:
@@ -412,10 +412,10 @@ def mainService(svrno):
                                 cntpost = norasset.index(cnt)
                         elif order['side'] == 'bid':
                             amtb = float(order['volume']) * float(order['price'])
-                            print("기존 매수 주문 금액 ", amtb)
+                            print("기존 매수 주문 금액 ", str(amtb))
                             addamtb = float(amtb) + float(setup[2])
                             cntb = round(addamtb / float(setup[2]))
-                            print("매수량 산출 배수 ", cntb)
+                            print("매수량 산출 배수 ", str(cntb))
                         else:
                             print("기존 매수 없음")
                     if amt == 0:
@@ -424,8 +424,8 @@ def mainService(svrno):
                         amtb = 0
                     if addamt == 0:
                         addamt = float(setup[2])
-                    print("현재 산출 회차 단계", cntpost)
-                    print("직전 주문 경과시간 ",lastbidsec,"초")
+                    print("현재 산출 회차 단계", str(cntpost))
+                    print("직전 주문 경과시간 ",str(lastbidsec),"초")
                     holdstat = ""
                     if holdcnt <= cntpost:
                         holdstat = "Y"
@@ -456,13 +456,13 @@ def mainService(svrno):
                         bidprice = float(setup[2])
                     else:
                         bidprice = round(addamt / float(setup[2])) * float(setup[2])
-                    print("다음 매수 금액 : ",bidprice)
+                    print("다음 매수 금액 : ",str(bidprice))
                     #다음 투자금 확인
                     trsets = setdetail(setup[8]) #상세 투자 설정
                     intvset = trsets[4:13] #투자설정 간격
                     marginset = trsets[14:23] #투자설정 이율
                     if cntpost > setup[3]:
-                        print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 설정치 초과 통과")
+                        print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 설정치 초과 통과")
                         print("------------------------")
                         continue
                         time.sleep(0.2)
@@ -474,17 +474,17 @@ def mainService(svrno):
                     else:
                         bideaprice = calprice(float(curprice * (1 - bidintv / 100)), uno)  # 목표 단가
                     bidvolume = float(bidprice)/float(bideaprice)
-                    print("매수설정단가 ", bideaprice)
-                    print("매수설정개수 ", bidvolume)
-                    print("설정회차", cntpost)
-                    print("설정금액",bidprice)
-                    print("설정간격", bidintv)
-                    print("설정이윤", bidmargin)
-                    print("구매한계 금액", amtlimit)
+                    print("매수설정단가 ", str(bideaprice))
+                    print("매수설정개수 ", str(bidvolume))
+                    print("설정회차", str(cntpost))
+                    print("설정금액",str(bidprice))
+                    print("설정간격", str(bidintv))
+                    print("설정이윤", str(bidmargin))
+                    print("구매한계 금액", str(amtlimit))
                     if amtlimityn == "Y":
                         activeamt = float(amt) + float(amtb)
                         if activeamt >= amtlimit:
-                            print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 구매 한계 금액 도달 통과")
+                            print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 구매 한계 금액 도달 통과")
                             print("------------------------")
                             continue
                             time.sleep(0.2)
@@ -493,31 +493,31 @@ def mainService(svrno):
                     if myrestvcoin != 0:
                         print("잔여 코인 존재: ", myrestvcoin)
                         order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
-                        print("사용자 ", setup[1], "설정번호 ", setup[0], " 코인 ", setup[6], " 매도 재주문")
+                        print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 매도 재주문")
                         print("------------------------")
                         continue
                         time.sleep(0.2)
                     if ordtype == 1:
-                        print("주문실행 설정", ordtype)
+                        print("주문실행 설정", str(ordtype))
                         first_trade(keys[0], keys[1], coinn, bidprice, bidintv, bidmargin, uno)
                     elif ordtype == 2:
-                        print("주문실행 설정", ordtype)
+                        print("주문실행 설정", str(ordtype))
                         canclebidorder(keys[0], keys[1], coinn, uno)
                     elif ordtype == 3:
-                        print("주문실행 설정", ordtype)
+                        print("주문실행 설정", str(ordtype))
                         #보유 현금이 충분할 경우만 실행
                         if mywon >= bidprice:
                             add_new_bid(keys[0],keys[1],coinn,bideaprice,bidvolume,uno)
                         else:
-                            print("현금 부족으로 주문 패스 (보유현금 :",mywon,")")
+                            print("현금 부족으로 주문 패스 (보유현금 :",str(mywon),")")
                     else:
                         print("이번 회차 주문 설정 없음")
                 # 주문 기록
-                    print("사용자 ",setup[1],"설정번호 ",setup[0]," 코인 ",setup[6], " 정상 종료")
+                    print("사용자 ",str(setup[1]),"설정번호 ",str(setup[0])," 코인 ",str(setup[6]), " 정상 종료")
                     print("------------------------")
                     time.sleep(0.3)
             except Exception as e:
-                msg = "사용자 " + setup[1] + "설정번호 " + setup[0] + " 코인 " + setup[6] + " 에러 "+ str(e)
+                msg = "사용자 " + str(setup[1]) + "설정번호 " + str(setup[0]) + " 코인 " + str(setup[6]) + " 에러 "+ str(e)
                 print(msg)
                 send_error(msg,uno)
                 continue
@@ -528,9 +528,9 @@ def mainService(svrno):
     finally:
         ntime = datetime.now()
         print('$$$$$$$$$$$$$$$$$$$')
-        print('거래점검 시간', ntime)
-        print('점검 서버', svrno)
-        print('서비스 버전', mainver)
+        print('거래점검 시간', str(ntime))
+        print('점검 서버', str(svrno))
+        print('서비스 버전', str(mainver))
         print('$$$$$$$$$$$$$$$$$$$')
         dbconn.clearcache()  # 캐쉬 삭제
 
@@ -612,7 +612,7 @@ def chk_lastbid(coinn, uno, restmin):
         past = datetime.strptime(lastbid, "%Y-%m-%d %H:%M:%S")
         diff = now - past
         diffmin = diff.seconds / 60
-        print("구매 경과 시간 :", diffmin, "분")
+        print("구매 경과 시간 :", str(diffmin), "분")
         if diffmin <= restmin:
             return "DELAY"
         else:
@@ -633,7 +633,7 @@ def check_hold(min,uno,coinn):
         past = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
         diff = now - past
         diffmin = diff.seconds / 60
-        print("경과시간 : ", diffmin,"분")
+        print("경과시간 : ", str(diffmin),"분")
         if diffmin <= min:
             return "HOLD"
         else:
@@ -661,7 +661,7 @@ def check_holdstart(min,uno,coinn): # 홀드시작이후 시간 체크
 cnt = 1
 service_start() # 시작시간 기록
 while True:
-    print("구동 횟수 : ", cnt)
+    print("구동 횟수 : ", str(cnt))
     try:
         mainService(svrno)
         cnt = cnt + 1
