@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241129002
+mainver = 241129003
 
 
 def loadmyset(uno):
@@ -467,8 +467,8 @@ def mainService(svrno):
                         continue
                         time.sleep(0.2)
                     else:
-                        bidintv = intvset[cntpost]
-                        bidmargin = marginset[cntpost]
+                        bidintv = intvset[cntpost-1]
+                        bidmargin = marginset[cntpost-1]
                     if coinn in ["KRW-ADA", "KRW-ALGO", "KRW-BLUR", "KRW-CELO", "KRW-ELF", "KRW-EOS", "KRW-GRS", "KRW-GRT", "KRW-ICX", "KRW-MANA", "KRW-MINA", "KRW-POL", "KRW-SAND", "KRW-SEI", "KRW-STG", "KRW-TRX"]:
                         bideaprice = calprice2(float(curprice * (1 - bidintv / 100)),uno) #목표 단가
                     else:
