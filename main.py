@@ -314,7 +314,7 @@ def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
         selllimitpr(key1, key2, coinn, setprice, setvolume, uno)
         print("1단계 매도 실행 완료")
     # 추가 예약 매수 실행
-        bidprice = ((preprice * 100) - (preprice * intergap)) / 100
+        bidprice = preprice * (1.00 - (intergap / 100.0))
         if coinn in ["KRW-ADA", "KRW-ALGO", "KRW-BLUR", "KRW-CELO", "KRW-ELF", "KRW-EOS", "KRW-GRS", "KRW-GRT",
                      "KRW-ICX", "KRW-MANA", "KRW-MINA", "KRW-POL", "KRW-SAND", "KRW-SEI", "KRW-STG", "KRW-TRX"]:
             bidprice = calprice2(bidprice, uno)
