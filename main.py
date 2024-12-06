@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241202001
+mainver = 241206001
 
 
 def loadmyset(uno):
@@ -321,7 +321,6 @@ def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
         else:
             bidprice = calprice(bidprice, uno)
         bidasset = bidasset * 2
-        preprice = bidprice  #현재가에 적용
         bidvol = bidasset / bidprice
         buylimitpr(key1, key2, coinn, bidprice, bidvol, uno)
         print("1단계 매수 실행 완료")
@@ -461,7 +460,7 @@ def mainService(svrno):
                     trsets = setdetail(setup[8]) #상세 투자 설정
                     intvset = trsets[4:13] #투자설정 간격
                     marginset = trsets[14:23] #투자설정 이율
-                    if cntpost > setup[3]:
+                    if cntpost-1 > setup[3]:
                         print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 설정치 초과 통과")
                         print("------------------------")
                         continue
