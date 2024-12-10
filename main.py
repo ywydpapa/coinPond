@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241208001
+mainver = 241210001
 
 
 def loadmyset(uno):
@@ -202,6 +202,10 @@ def order_mod_ask5(key1, key2, coinn, profit, uno):  #이윤 변동식 계산 �
         cancelaskorder(key1, key2, coinn, uno)  # 기존 매도 주문 취소
         tradednew = checktraded(key1, key2, coinn, uno)  # 설정 코인 지갑내 존재 확인
         totalamt = (float(tradednew['balance']) + float(tradednew['locked'])) * float(tradednew['avg_buy_price'])  # 전체 구매 금액
+        if totalamt < 5000:
+            print("보유금액 5000원 미만으로 추가 구매후 매도")
+            buymarketpr(key1, key2, coinn, 5000 , uno) #1만원 추가 구매
+            totalamt = (float(tradednew['balance']) + float(tradednew['locked'])) * float(tradednew['avg_buy_price'])  # 전체 구매 금액
         totalvol = float(tradednew['balance']) + float(tradednew['locked'])  # 전체 구매 수량
         totalamt = totalamt + (totalamt * profit / 100)
         print("재설정 이윤 :", str(profit))
@@ -488,7 +492,7 @@ def mainService(svrno):
                             continue
                             time.sleep(0.2)
                     else:
-                        print("구매금액 설정 없음")
+                        print("구매한계 금액 설정 없음")
                     if myrestvcoin != 0:
                         print("잔여 코인 존재: ", myrestvcoin)
                         order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
