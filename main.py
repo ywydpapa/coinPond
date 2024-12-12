@@ -547,6 +547,7 @@ def service_restart():
     myip = requests.get('http://ip.jsontest.com').json()['ip']
     msg = "Server " + str(svrno) + " Service Restart : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : "+ str(mainver)
     send_error(msg, '0')
+    dbconn.serviceStat(svrno, myip, mainver)
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 
@@ -556,6 +557,7 @@ def service_start():
     myip = requests.get('http://ip.jsontest.com').json()['ip']
     msg = "Server " + str(svrno) + " Service Start : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : "+ str(mainver)
     dbconn.servicelog(msg,0)
+    dbconn.serviceStat(svrno, myip, mainver)
 
 
 def send_error(err, uno):

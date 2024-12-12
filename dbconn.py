@@ -271,4 +271,17 @@ def insertLog(uno,ldata01,ldata02,ldata03,ldata04,ldata05,ldata06,ldata07,ldata0
         db35.close()
 
 
+def serviceStat(sno,sip,sver):
+    global rows
+    db36 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur36 = db36.cursor()
+    try:
+        sql = "INSERT INTO service_Stat (serverNo,serviceIp,serviceVer) VALUES (%s, %s, %s)"
+        cur36.execute(sql,(sno,sip,sver))
+        db36.commit()
+    except Exception as e:
+        print('접속상태 Log 기록 에러', e)
+    finally:
+        cur36.close()
+        db36.close()
 
