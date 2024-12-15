@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241215001
+mainver = 241215002
 
 
 def loadmyset(uno):
@@ -544,8 +544,7 @@ def mainService(svrno):
 def service_restart():
     tstamp = datetime.now()
     print("Service Restart : ", tstamp)
-    myip = "0.0.0.0"
-        # requests.get('http://ip.jsontest.com').json())['ip']
+    myip = (requests.get('https://api.ip.pe.kr/json/').json())['ip']
     msg = "Server " + str(svrno) + " Service Restart : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : "+ str(mainver)
     send_error(msg, '0')
     dbconn.serviceStat(svrno, myip, mainver)
@@ -555,7 +554,7 @@ def service_restart():
 def service_start():
     tstamp = datetime.now()
     print("Service Start : ", tstamp)
-    myip = "0.0.0.0"
+    myip = (requests.get('https://api.ip.pe.kr/json/').json())['ip']
         # requests.get('http://ip.jsontest.com').json())['ip']
     msg = "Server " + str(svrno) + " Service Start : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : "+ str(mainver)
     dbconn.servicelog(msg,0)
