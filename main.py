@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241215003
+mainver = 241215004
 
 
 def loadmyset(uno):
@@ -559,6 +559,7 @@ def service_start():
     msg = "Server " + str(svrno) + " Service Start : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : "+ str(mainver)
     dbconn.servicelog(msg,0)
     dbconn.serviceStat(svrno, myip, mainver)
+    os.system("pip install -r ./requirement.txt")
 
 
 def send_error(err, uno):
