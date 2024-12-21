@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241216001
+mainver = 241222001
 
 
 def loadmyset(uno):
@@ -300,7 +300,7 @@ def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
         bidasset = initAsset #매수 금액
         buyrest = buymarketpr(key1, key2, coinn, bidasset,uno)  # 첫번째 설정 구매
         print("시장가 구매", str(buyrest))
-        time.sleep(1)
+        time.sleep(0.5)
     except Exception as e:
         msg = '시장가 구매 에러 '+ str(e)
         send_error(msg, uno)
@@ -345,7 +345,7 @@ def mainService(svrno):
                     holdcnt = setup[11]
                     amtlimityn = setup[13]
                     amtlimit = setup[14]
-                    vcoin = setup[6][4:] #코인명
+                    vcoin = setup[6][4:]
                     keys = dbconn.getupbitkey(uno) # 키를 받아 오기
                     upbit = pyupbit.Upbit(keys[0], keys[1])
                     mycoins = upbit.get_balances()
@@ -396,7 +396,7 @@ def mainService(svrno):
                         cntask = 0
                         cntbid = 0
                     norasset = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
-                    cntpost = 0 #매수 회차 산출 프로세스
+                    cntpost = 1 #매수 회차 산출 프로세스
                     print("현재 매도주문수 ", str(cntask))
                     print("현재 매수주문수 ", str(cntbid))
                     for order in myorders:
@@ -467,8 +467,11 @@ def mainService(svrno):
                     if cntpost-1 > setup[3]:
                         print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 설정치 초과 통과")
                         print("------------------------")
-                        continue
                         time.sleep(0.2)
+                        continue
+                    elif cntpost-1 == setup[3]: #마지막 단계
+                        bidintv = intvset[cntpost - 1]
+                        bidmargin = marginset[cntpost - 1]
                     else:
                         bidintv = intvset[cntpost-1]
                         bidmargin = marginset[cntpost-1]
@@ -489,8 +492,8 @@ def mainService(svrno):
                         if activeamt >= amtlimit:
                             print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 구매 한계 금액 도달 통과")
                             print("------------------------")
-                            continue
                             time.sleep(0.2)
+                            continue
                     else:
                         print("구매한계 금액 설정 없음")
                     if myrestvcoin != 0:
@@ -498,8 +501,8 @@ def mainService(svrno):
                         order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
                         print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 매도 재주문")
                         print("------------------------")
-                        continue
                         time.sleep(0.2)
+                        continue
                     if ordtype == 1:
                         print("주문실행 설정", str(ordtype))
                         if mywon >= bidprice:
