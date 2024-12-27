@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241223001
+mainver = 241228001
 
 
 def loadmyset(uno):
@@ -467,7 +467,7 @@ def mainService(svrno):
                     trsets = setdetail(setup[8]) #상세 투자 설정
                     intvset = trsets[4:13] #투자설정 간격
                     marginset = trsets[14:23] #투자설정 이율
-                    if cntpost-1 > setup[3]:
+                    if cntpost-1 >= setup[3]:
                         print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 설정치 초과 통과")
                         print("------------------------")
                         time.sleep(0.2)
