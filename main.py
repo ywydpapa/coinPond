@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241228001
+mainver = 241223001
 
 
 def loadmyset(uno):
@@ -353,6 +353,7 @@ def mainService(svrno):
                     myvcoin = 0 #보유 코인
                     vcoinprice = 0 #코인 평균 구매가
                     myrestvcoin = 0 #잔여 코인
+                    vcoinamt = 0 #코인 구매금액
                     bidprice = 0
                     amt = 0
                     amtb = 0
@@ -370,6 +371,7 @@ def mainService(svrno):
                             myvcoin = float(coin["balance"]) + float(coin["locked"])
                             myrestvcoin = float(coin["balance"])
                             vcoinprice = float(coin["avg_buy_price"])
+                            vcoinamt = myvcoin * vcoinprice
                             print(str(vcoin),":",str(myvcoin), "Price :", str(vcoinprice))
                 # 지갑내용 받아오기 - 해당 코인만
                     coinn = "KRW-"+vcoin
@@ -401,8 +403,9 @@ def mainService(svrno):
                     print("현재 매수주문수 ", str(cntbid))
                     for order in myorders:
                         if order['side'] == 'ask':
-                            amt = float(order['volume']) * float(order['price'])
-                            print("기존 매도 금액 ", str(amt))
+                            # amt = float(order['volume']) * float(order['price'])/float(100+setup[5])*100
+                            amt = vcoinamt
+                            print("기존 보유 금액 ", str(amt))
                             addamt = float(amt) + float(setup[2]) #회차 계산용 금액 투입금액 플러스
                             cnt = round(addamt / float(setup[2])) #회차 계산
                             print("매도량 산출 배수 ", str(cnt))
@@ -464,7 +467,7 @@ def mainService(svrno):
                     trsets = setdetail(setup[8]) #상세 투자 설정
                     intvset = trsets[4:13] #투자설정 간격
                     marginset = trsets[14:23] #투자설정 이율
-                    if cntpost-1 >= setup[3]:
+                    if cntpost-1 > setup[3]:
                         print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 설정치 초과 통과")
                         print("------------------------")
                         time.sleep(0.2)
