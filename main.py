@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 241228001
+mainver = 241230001
 
 
 def loadmyset(uno):
@@ -470,6 +470,13 @@ def mainService(svrno):
                     if cntpost-1 >= setup[3]:
                         print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 설정치 초과 통과")
                         print("------------------------")
+                        # 잔여코인 재매도 주문
+                        bidmargin = marginset[cntpost - 1]
+                        if myrestvcoin != 0:
+                            print("잔여 코인 존재: ", myrestvcoin)
+                            order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
+                            print("사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 매도 재주문")
+                            print("------------------------")
                         time.sleep(0.2)
                         continue
                     elif cntpost-1 == setup[3]: #마지막 단계
