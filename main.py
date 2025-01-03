@@ -14,7 +14,7 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 250101001
+mainver = 250103001
 
 
 def loadmyset(uno):
@@ -103,28 +103,56 @@ def checktraded(key1, key2, coinn, uno):
         send_error(msg, uno)
 
 
+def get_tick_size(price):
+    if price >= 2000000:
+        return 1000
+    elif price >= 1000000:
+        return 500
+    elif price >= 500000:
+        return 100
+    elif price >= 100000:
+        return 50
+    elif price >= 10000:
+        return 10
+    elif price >= 1000:
+        return 1
+    elif price >= 100:
+        return 0.1
+    elif price >= 10:
+        return 0.01
+    elif price >= 1:
+        return 0.001
+    else:
+        return 0.0001
+
+
+def get_tick_size2(price):
+    if price >= 2000000:
+        return 1000
+    elif price >= 1000000:
+        return 500
+    elif price >= 500000:
+        return 100
+    elif price >= 100000:
+        return 50
+    elif price >= 10000:
+        return 10
+    elif price >= 1000:
+        return 1
+    elif price >= 100:
+        return 1
+    elif price >= 10:
+        return 0.01
+    elif price >= 1:
+        return 0.001
+    else:
+        return 0.0001
+
+
 def calprice(bidprice, uno):
     try:
-        if bidprice >= 2000000:
-            bidprice = round(bidprice, -3)
-        elif 1000000 <= bidprice < 20000000:
-            bidprice = round(bidprice, -3) + 500
-        elif 500000 <= bidprice < 1000000:
-            bidprice = round(bidprice, -2)
-        elif 100000 <= bidprice < 500000:
-            bidprice = round(bidprice, -2) + 50
-        elif 10000 <= bidprice < 100000:
-            bidprice = round(bidprice, -1)
-        elif 1000 <= bidprice < 10000:
-            bidprice = round(bidprice)
-        elif 100 <= bidprice < 1000:
-            bidprice = round(bidprice, 1)
-        elif 10 <= bidprice < 100:
-            bidprice = round(bidprice, 2)
-        elif 1 <= bidprice < 10:
-            bidprice = round(bidprice, 3)
-        else:
-            bidprice = round(bidprice, 4)
+        ticksize = get_tick_size(bidprice)
+        bidprice = round(bidprice/ticksize) * ticksize
     except Exception as e:
         msg = "주문 가격 산출 에러 " + str(e)
         send_error(msg, uno)
@@ -134,26 +162,8 @@ def calprice(bidprice, uno):
 
 def calprice2(bidprice, uno):
     try:
-        if bidprice >= 2000000:
-            bidprice = round(bidprice, -3)
-        elif 1000000 <= bidprice < 20000000:
-            bidprice = round(bidprice, -3) + 500
-        elif 500000 <= bidprice < 1000000:
-            bidprice = round(bidprice, -2)
-        elif 100000 <= bidprice < 500000:
-            bidprice = round(bidprice, -2) + 50
-        elif 10000 <= bidprice < 100000:
-            bidprice = round(bidprice, -1)
-        elif 1000 <= bidprice < 10000:
-            bidprice = round(bidprice)
-        elif 100 <= bidprice < 1000:
-            bidprice = round(bidprice)
-        elif 10 <= bidprice < 100:
-            bidprice = round(bidprice, 2)
-        elif 1 <= bidprice < 10:
-            bidprice = round(bidprice, 3)
-        else:
-            bidprice = round(bidprice, 4)
+        ticksize = get_tick_size2(bidprice)
+        bidprice = round(bidprice/ticksize) * ticksize
     except Exception as e:
         msg = "주문 가격 산출 에러 " + str(e)
         send_error(msg, uno)
