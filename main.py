@@ -14,13 +14,13 @@ from dbconn import tradelog, setdetail
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 250204001
+mainver = 20250204001
 
 
 def loadmyset(uno):
     global mysett
     try:
-        mysett = dbconn.getsetups(uno)
+        mysett = dbconn.getmsetup(uno)
     except Exception as e:
         msg = "나의 세팅 조회 에러 " + str(e)
         send_error(msg, uno)
@@ -234,62 +234,6 @@ def order_mod_ask5(key1, key2, coinn, profit, uno):  #이윤 변동식 계산 �
         send_error(msg, uno)
 
 
-def get_trend(coinn , uno):
-    opoint, cpoint, hpoint, lpoint, vpoint = 0, 0, 0, 0, 0
-    trend = []
-    try:
-        crprice = pyupbit.get_current_price(coinn)
-        candls = pyupbit.get_ohlcv(ticker=coinn, interval="minute1", count=4)
-        candls = [candls]
-        openpr = candls[0]['open'].tolist()
-        closepr = candls[0]['close'].tolist()
-        highpr = candls[0]['high'].tolist()
-        lowpr = candls[0]['low'].tolist()
-        volumepr = candls[0]['volume'].tolist()
-        opric, cpric, hpric, lpric, volic = [], [], [], [], []
-        for i in range(0, 3):
-            if openpr[i + 1] > openpr[i]:
-                opric.append('+')
-                opoint = opoint + 1
-            elif openpr[i + 1] <= openpr[i]:
-                opric.append('-')
-                opoint = opoint - 1
-            if closepr[i + 1] > closepr[i]:
-                cpric.append('+')
-                cpoint = cpoint + 1
-            elif closepr[i + 1] <= closepr[i]:
-                cpric.append('-')
-                cpoint = cpoint - 1
-            if highpr[i + 1] > highpr[i]:
-                hpric.append('+')
-                hpoint = hpoint + 1
-            elif highpr[i + 1] <= highpr[i]:
-                hpric.append('-')
-                hpoint = hpoint - 1
-            if lowpr[i + 1] > lowpr[i]:
-                lpric.append('+')
-                lpoint = lpoint + 1
-            elif lowpr[i + 1] <= lowpr[i]:
-                lpric.append('-')
-                lpoint = lpoint - 1
-            if volumepr[i + 1] > volumepr[i]:
-                volic.append('+')
-                vpoint = vpoint + 1
-            elif volumepr[i + 1] <= volumepr[i]:
-                volic.append('-')
-                vpoint = vpoint - 1
-        trend = opric
-        trend.extend(cpric)
-        trend.extend(hpric)
-        trend.extend(lpric)
-        trend.extend(volic)
-    except Exception as e:
-        msg = "트렌드 체크 에러 "+str(e)
-        send_error(msg, uno)
-    finally:
-        return trend, opoint + cpoint + hpoint + lpoint, vpoint
-
-
 def add_new_bid(key1, key2, coinn, bidprice, bidvol, uno):
     try:
         ret = buylimitpr(key1, key2, coinn, bidprice, bidvol, uno)
@@ -340,8 +284,240 @@ def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
         print("1단계 매수 실행 완료")
     return None
 
+def each_trade(key1, key2, coinn, initAsset, profit, uno):
+    global buyrest, bidasset, bidcnt, askcnt
+    print("새로운 주문 함수 실행")
+    preprice = pyupbit.get_current_price(coinn)  # 현재값 로드
+    try:
+        bidasset = initAsset+1000 #매수 금액
+        buyrest = buymarketpr(key1, key2, coinn, bidasset,uno)  # 첫번째 설정 구매
+        print("시장가 구매", str(buyrest))
+        time.sleep(0.1)
+    except Exception as e:
+        msg = '시장가 구매 에러 '+ str(e)
+        send_error(msg, uno)
+        print(msg)
+    finally:
+        print("1단계 매수내역 :", buyrest)
+        traded = checktraded(key1, key2, coinn, uno)  # 설정 코인 지갑내 존재 확인
+        setprice = float(preprice) * (1.0 + (profit / 100.0))
+        if coinn in ["KRW-ADA", "KRW-ALGO", "KRW-BLUR", "KRW-CELO", "KRW-ELF", "KRW-EOS", "KRW-GRS", "KRW-GRT",
+                     "KRW-ICX", "KRW-MANA", "KRW-MINA", "KRW-POL", "KRW-SAND", "KRW-SEI", "KRW-STG", "KRW-TRX"]:
+            setprice = calprice2(setprice, uno)
+        else:
+            setprice = calprice(setprice, uno)
+        setvolume = traded['balance']
+        selllimitpr(key1, key2, coinn, setprice, setvolume, uno)
+        print("매도 실행 완료")
+    return None
 
-def mainService(svrno):
+
+def trService(svrno):
+    global uno
+    users =  dbconn.getsetonsvr_tr(svrno)
+    try:
+        for user in users:
+            setups = dbconn.getmsetup_tr(user)
+            try:
+                for setup in setups: #(658,	23,	10000.0, 9,	1.0, 0.5, KRW-ZETA,	Y, 42, 21, N, 6, N, N, 1000000.0)
+                    if setup[7]!="Y":
+                        continue #구동중이지 않은 경우 통과
+                    uno = setup[1]
+                    holdcnt = setup[11]
+                    amtlimityn = setup[13]
+                    amtlimit = setup[14]
+                    vcoin = setup[6][4:]
+                    keys = dbconn.getupbitkey_tr(uno) # 키를 받아 오기
+                    upbit = pyupbit.Upbit(keys[0], keys[1])
+                    mycoins = upbit.get_balances()
+                    mywon = 0 #보유 원화
+                    myvcoin = 0 #보유 코인
+                    vcoinprice = 0 #코인 평균 구매가
+                    myrestvcoin = 0 #잔여 코인
+                    vcoinamt = 0 #코인 구매금액
+                    bidprice = 0
+                    amt = 0
+                    amtb = 0
+                    addamt = 0
+                    addamtb = 0
+                    cnt = 0
+                    cntb = 0
+                    calamt = 0
+                    ordtype = 0 #주문 종류
+                    for coin in mycoins:
+                        if coin["currency"] == "KRW":
+                            mywon = float(coin["balance"])
+                            print("KRW", mywon)
+                        if coin["currency"] == vcoin:
+                            myvcoin = float(coin["balance"]) + float(coin["locked"])
+                            myrestvcoin = float(coin["balance"])
+                            vcoinprice = float(coin["avg_buy_price"])
+                            vcoinamt = myvcoin * vcoinprice
+                            print(str(vcoin),":",str(myvcoin), "Price :", str(vcoinprice))
+                    coinn = "KRW-"+vcoin
+                    curprice = pyupbit.get_current_price(coinn)
+                    print("코인 현재 시장가", str(curprice))
+                    print("최초 매수 설정 금액 ", str(setup[2]) )
+                    myorders = upbit.get_order(coinn, state='wait') #대기중 주문 조회
+                    cntask = 0 #매도 주문수
+                    cntbid = 0 #매수 주문수
+                    lastbidsec = 0 #최종 주문 시간
+                    if myorders is not None:
+                        for order in myorders:
+                            nowt = datetime.now()
+                            if order["side"] == "ask":
+                                cntask = cntask + 1 # 매도 주문수 카운트
+                                last = order["created_at"]
+                                last = last.replace("T", " ")
+                                last = last[:-6]
+                                last = datetime.strptime(last, "%Y-%m-%d %H:%M:%S")
+                                lastbidsec = (nowt - last).seconds
+                            elif order["side"] == "bid":
+                                cntbid = cntbid + 1 #매수 주문 수 카운트
+                    else: # 둘다 없을때 0으로 설정
+                        cntask = 0
+                        cntbid = 0
+                    cntpost = 0 #매수 회차 산출 프로세스
+                    print("현재 매도주문수 ", str(cntask))
+                    print("현재 매수주문수 ", str(cntbid))
+                    # 상세 설정
+                    trsets = dbconn.setdetail_tr(setup[8])  # 상세 투자 설정 Trace 로 설정 변경
+                    mrate = float(setup[2]/10000)
+                    gapsz = trsets[3:13]
+                    intsz = trsets[13:23]
+                    netsz = trsets[23:33]
+                    netsz = [netsz[i]*mrate for i in range(0,len(netsz))]
+                    limsz = trsets[33:43]
+                    limsz = [limsz[k]*mrate for k in range(0,len(limsz))]
+                    for order in myorders:
+                        if order['side'] == 'ask':
+                            amt = vcoinamt #기존 보유 금액
+                            print("기존 보유 금액 ", str(amt))
+                            cntpost = 1 #회차 계산
+                            for lim in limsz:
+                                if amt >= float(lim):
+                                    cntpost += 1
+                                else:
+                                    continue
+                        elif order['side'] == 'bid':
+                            amtb = float(order['volume']) * float(order['price'])
+                            print("기존 매수 주문 금액 ", str(amtb))
+                        else:
+                            print("기존 매수 없음")
+                        if cntpost > 10: #최대 구매 상태 도달
+                            cntpost = 10
+                            if vcoinamt >= float(limsz[cntpost-1]):
+                                print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6])," 최종 구매 금액 도달 통과")
+                                print("------------------------")
+                                continue
+                    if amt == 0:
+                        cntpost = 1
+                        amt = float(netsz[int(cntpost-1)]) #현재 구매 설정 금액
+                    if amtb == 0:
+                        amtb = 0
+                    if addamt == 0:
+                        addamt = float(setup[2])
+                    print("현재 산출 회차 단계", str(cntpost))
+                    print("직전 주문 경과시간 ",str(lastbidsec),"초")
+                # 주문 확인
+                    if cntask == 0 and cntbid == 0:  #신규주문
+                        ordtype = 1
+                        cnt = 1
+                    elif cntask ==0 and cntbid !=0:  #매도후 매수취소
+                        ordtype = 2
+                    elif cntask !=0 and cntbid ==0:  #추가 매수 진행
+                        #홀드 및 신호등 체크 !!!!!
+                        if lastbidsec < 2:
+                            ordtype = 0
+                            print("급격하락 1초 딜레이")
+                        else:
+                            ordtype = 3
+                    else:
+                        ordtype = 0 # 기타
+                    if cntbid == 0 and cntask == 0:
+                        bidprice = float(netsz[int(cntpost-1)])
+                    else:
+                        bidprice = float(netsz[int(cntpost-1)])
+                    print("매수 설정 금액 : ",str(bidprice))
+                    #다음 투자금 확인
+                    intvset = 0
+                    marginset = 0
+                    bidintv = gapsz[int(cntpost-1)] #간격 설정
+                    bidmargin = intsz[int(cntpost-1)] #이윤 설정
+                    if coinn in ["KRW-ADA", "KRW-ALGO", "KRW-BLUR", "KRW-CELO", "KRW-ELF", "KRW-EOS", "KRW-GRS", "KRW-GRT", "KRW-ICX", "KRW-MANA", "KRW-MINA", "KRW-POL", "KRW-SAND", "KRW-SEI", "KRW-STG", "KRW-TRX"]:
+                        bideaprice = calprice2(float(curprice * (1 - bidintv / 100)),uno) #목표 단가
+                    else:
+                        bideaprice = calprice(float(curprice * (1 - bidintv / 100)), uno)  # 목표 단가
+                    bidvolume = float(bidprice)/float(bideaprice)
+                    print("매수설정단가 ", str(bideaprice))
+                    print("매수설정개수 ", str(bidvolume))
+                    print("설정회차", str(cntpost))
+                    print("설정금액",str(bidprice))
+                    print("설정간격", str(bidintv))
+                    print("설정이윤", str(bidmargin))
+                    print("구매한계 금액", str(amtlimit))
+                    if amtlimityn == "Y":
+                        activeamt = float(amt) + float(amtb)
+                        if activeamt >= amtlimit:
+                            print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 구매 한계 금액 도달 통과")
+                            print("------------------------")
+                            if myrestvcoin != 0:
+                                print("잔여 코인 존재: ", myrestvcoin)
+                                order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
+                                print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 매도 재주문")
+                                print("------------------------")
+                            time.sleep(0.15)
+                            continue
+                    else:
+                        print("구매한계 금액 설정 없음")
+                    if myrestvcoin != 0:
+                        print("잔여 코인 존재: ", myrestvcoin)
+                        order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
+                        print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 매도 재주문")
+                        print("------------------------")
+                        time.sleep(0.15)
+                        continue
+                    if ordtype == 1:
+                        print("주문실행 설정", str(ordtype))
+                        if mywon >= bidprice:
+                            each_trade(keys[0],keys[1],coinn,bidprice,bidmargin,uno)
+                        else:
+                            print("현금 부족으로 1차 주문 패스 (보유현금 :", str(mywon), ")")
+                    elif ordtype == 2:
+                        print("주문실행 설정", str(ordtype))
+                        canclebidorder(keys[0], keys[1], coinn, uno)
+                    elif ordtype == 3:
+                        print("주문실행 설정", str(ordtype))
+                        #보유 현금이 충분할 경우만 실행
+                        if mywon >= bidprice:
+                            add_new_bid(keys[0],keys[1],coinn,bideaprice,bidvolume,uno)
+                        else:
+                            print("현금 부족으로 주문 패스 (보유현금 :",str(mywon),")")
+                    else:
+                        print("이번 회차 주문 설정 없음")
+                # 주문 기록
+                    print("TR사용자 ",str(setup[1]),"Trace 설정번호 ",str(setup[0])," 코인 ",str(setup[6]), " 정상 종료")
+                    print("------------------------")
+                    time.sleep(0.15)
+            except Exception as e:
+                msg = "TR사용자 " + str(setup[1]) + "설정번호 " + str(setup[0]) + " 코인 " + str(setup[6]) + " 에러 "+ str(e)
+                print(msg)
+                send_error(msg,uno)
+                continue
+    except Exception as e:
+        msg = "구간 루프 에러 :" + str(e)
+        send_error(msg, uno)
+        print("구간 루프 에러 :", e)
+    finally:
+        ntime = datetime.now()
+        print('TRTRTRTRTRTRTRTRTRTRTRTRTRTRTR')
+        print('거래점검 시간', str(ntime))
+        print('점검 서버', str(svrno))
+        print('서비스 버전', str(mainver))
+        print('TRTRTRTRTRTRTRTRTRTRTRTRTRTRTR')
+        dbconn.clearcache()  # 캐쉬 삭제
+
+def pondService(svrno):
     global uno
     users =  dbconn.getsetonsvr(svrno)
     try:
@@ -704,10 +880,28 @@ def check_holdstart(min,uno,coinn): # 홀드시작이후 시간 체크
 
 cnt = 1
 service_start() # 시작시간 기록
+servtype = "POND"
+servtype = dbconn.getserverType(svrno)[0]
+serveryn = dbconn.getserverType(svrno)[1]
+
+if servtype is None :
+    servtype = "POND"
+if serveryn is None :
+    serveryn = "Y"
+
 while True:
     print("구동 횟수 : ", str(cnt))
     try:
-        mainService(svrno)
+        if servtype == "POND" and serveryn =='Y':
+            pondService(svrno)
+        elif servtype == "TRACE" and serveryn =='Y':
+            trService(svrno)
+        elif servtype == "EXP":
+            print("Not Available Server !!")
+            pass
+        else:
+            print("No Server Data !!")
+            pass
         cnt = cnt + 1
     except Exception as e:
         msg = "메인 while 반복문 에러 : "+str(e)

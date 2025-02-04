@@ -21,7 +21,7 @@ mainver = 241023001
 def loadmyset(uno):
     global mysett
     try:
-        mysett = dbconn.getsetups(uno)
+        mysett = dbconn.getmsetup(uno)
     except Exception as e:
         msg = "나의 세팅 조회 에러 " + str(e)
         send_error(msg, uno)

@@ -17,24 +17,7 @@ charsetenv = os.getenv("charset")
 
 
 db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
-serverNo = 2
-serviceNo = 240808
-
-
-
-def getsetups(uno):
-    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
-    cur13 = db.cursor()
-    try:
-        sql = "select * from tradingSetup where userNo=%s and attrib not like %s"
-        cur13.execute(sql, (uno, '%XXXUP'))
-        data = list(cur13.fetchone())
-        return data
-    except Exception as e:
-        print('접속오류', e)
-    finally:
-        cur13.close()
-        db.close()
+serviceNo = 250204
 
 
 def getmsetup(uno):
@@ -52,17 +35,18 @@ def getmsetup(uno):
         db.close()
 
 
-def setonoff(uno,yesno):
+def getmsetup_tr(uno):
     db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
-    cur14 = db.cursor()
+    cur13 = db.cursor()
     try:
-        sql = "UPDATE tradingSetup SET activeYN = %s where userNo=%s AND attrib not like %s"
-        cur14.execute(sql, (yesno, uno,'%XXXUP'))
-        db.commit()
+        sql = "select * from traceSetup where userNo=%s and attrib not like %s"
+        cur13.execute(sql, (uno, '%XXXUP'))
+        data = list(cur13.fetchall())
+        return data
     except Exception as e:
         print('접속오류', e)
     finally:
-        cur14.close()
+        cur13.close()
         db.close()
 
 
@@ -99,11 +83,42 @@ def getsetonsvr(svrNo):
         db.close()
 
 
+def getsetonsvr_tr(svrNo):
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur16 = db.cursor()
+    data = []
+    try:
+        sql = "SELECT distinct userNo from traceSetup where attrib not like %s and serverNo=%s"
+        cur16.execute(sql,('%XXXUP', svrNo))
+        data = cur16.fetchall()
+        return data
+    except Exception as e:
+        print('접속오류',e)
+    finally:
+        cur16.close()
+        db.close()
+
+
 def getupbitkey(uno):
     db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur17 = db.cursor()
     try:
         sql = "SELECT apiKey1, apiKey2 FROM pondUser WHERE userNo=%s and attrib not like %s"
+        cur17.execute(sql, (uno,'%XXXUP'))
+        data = cur17.fetchone()
+        return data
+    except Exception as e:
+        print('접속오류',e)
+    finally:
+        cur17.close()
+        db.close()
+
+
+def getupbitkey_tr(uno):
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur17 = db.cursor()
+    try:
+        sql = "SELECT apiKey1, apiKey2 FROM traceUser WHERE userNo=%s and attrib not like %s"
         cur17.execute(sql, (uno,'%XXXUP'))
         data = cur17.fetchone()
         return data
@@ -140,6 +155,23 @@ def setdetail(setno):
     return rows
 
 
+def setdetail_tr(setno):
+    global rows
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur20 = db.cursor()
+    row = None
+    try:
+        sql = "SELECT * FROM traceSets WHERE setNo = %s"
+        cur20.execute(sql, setno)
+        rows = cur20.fetchone()
+    except Exception as e:
+        print('접속오류', e)
+    finally:
+        cur20.close()
+        db.close()
+    return rows
+
+
 def errlog(err,userno):
     global rows
     db28 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
@@ -155,21 +187,6 @@ def errlog(err,userno):
         db28.close()
 
 
-def setholdYN(setno, yn):
-    global rows
-    db29 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
-    cur29 = db29.cursor()
-    try:
-        sql = "UPDATE tradingSetup set holdYN = %s where setupNo = %s"
-        cur29.execute(sql, (yn, setno))
-        db29.commit()
-    except Exception as e:
-        print('접속오류 에러로그', e)
-    finally:
-        cur29.close()
-        db29.close()
-
-
 def servicelog(log,userno):
     global rows
     db30 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
@@ -183,22 +200,6 @@ def servicelog(log,userno):
     finally:
         cur30.close()
         db30.close()
-
-
-def getSignal(coinn):
-    global rows
-    db31 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
-    cur31 = db31.cursor()
-    try:
-        sql = "SELECT * FROM trendSignal WHERE coinName=%s and attrib NOT LIKE %s"
-        cur31.execute(sql, (coinn, "UPD00%"))
-        rows = cur31.fetchone()
-    except Exception as e:
-        print("코인 트렌드 조회 에러 : ",e)
-    finally:
-        cur31.close()
-        db31.close()
-        return rows
 
 
 def tradelog(uno,type,coinn,tstamp):
@@ -285,3 +286,17 @@ def serviceStat(sno,sip,sver):
         cur36.close()
         db36.close()
 
+def getserverType(sno):
+    global rows
+    db37 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur37 = db37.cursor()
+    try:
+        sql = "select serviceType, serviceYN from serverSet where serverNo = %s and attrib not like %s"
+        cur37.execute(sql,(sno, "XXXUP%"))
+        rows = cur37.fetchone()
+    except Exception as e:
+        print('서버 서비스 조회', e)
+    finally:
+        cur37.close()
+        db37.close()
+        return rows
