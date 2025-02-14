@@ -865,7 +865,7 @@ def chk_lastbid(coinn, uno, restmin):
 
 
 def losscut(uno, coinn, gap):
-    keys = getkey(uno)
+    keys = dbconn.getupbitkey(uno)
     canclebidorder(keys[0],keys[1],coinn,uno)
     cancelaskorder(keys[0],keys[1],coinn,uno)
     upbit = pyupbit.Upbit(keys[0], keys[1])
