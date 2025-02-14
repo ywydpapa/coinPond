@@ -9,8 +9,6 @@ import os
 import sys
 import requests
 
-from collectask import getkey
-from dbconn import tradelog, setdetail
 
 dotenv.load_dotenv()
 bidcnt = 1
