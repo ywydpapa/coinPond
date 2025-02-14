@@ -9,12 +9,13 @@ import os
 import sys
 import requests
 
+from collectask import getkey
 from dbconn import tradelog, setdetail
 
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250204001
+mainver = 20250214001
 
 
 def loadmyset(uno):
@@ -753,7 +754,7 @@ def service_restart():
         myip = (requests.get('https://api.ip.pe.kr/json/').json())['ip']
     except Exception as e:
         myip = "0.0.0.0"
-    msg = "Server " + str(svrno) + " Service Restart : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : "+ str(mainver)
+    msg = "Server " + str(svrno) + " Service Restart : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : "+ str(mainver)+ ":" + str(servtype)
     send_error(msg, '0')
     dbconn.serviceStat(svrno, myip, mainver)
     os.execl(sys.executable, sys.executable, *sys.argv)
@@ -766,9 +767,10 @@ def service_start():
         myip = (requests.get('https://api.ip.pe.kr/json/').json())['ip']
     except Exception as e:
         myip = "0.0.0.0"
-    msg = "Server " + str(svrno) + " Service Start : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : "+ str(mainver)
+    msg = "Server " + str(svrno) + " Service Start : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : " + str(mainver) + ":" + str(servtype)
+    vermsg = str(mainver) + ":" + str(servtype)
     dbconn.servicelog(msg,0)
-    dbconn.serviceStat(svrno, myip, mainver)
+    dbconn.serviceStat(svrno, myip, vermsg)
     os.system("pip install -r ./requirement.txt")
 
 
@@ -841,6 +843,24 @@ def chk_lastbid(coinn, uno, restmin):
         print("직전 구매 이력 없음")
 
 
+def losscut(uno, coinn, gap):
+    keys = getkey(uno)
+    canclebidorder(keys[0],keys[1],coinn,uno)
+    cancelaskorder(keys[0],keys[1],coinn,uno)
+    upbit = pyupbit.Upbit(keys[0], keys[1])
+    walt = upbit.get_balances()
+    crp = pyupbit.get_current_price(coinn)
+    for coin in walt:
+        if coin['currency'] == coinn:
+            balance = coin['balance']
+            lcgap = (crp-coin['avg_buy_price'])/coin['avg_buy_price']
+            result = upbit.sell_market_order(coinn, balance)
+            if result is not None:
+                dbconn.lclog(coinn, uno, lcgap)
+        else:
+            pass
+
+
 def save_holdtime(uno,coinn):
     dbconn.tradelog(uno,'HOLD',coinn)
 
@@ -879,15 +899,16 @@ def check_holdstart(min,uno,coinn): # 홀드시작이후 시간 체크
 
 
 cnt = 1
-service_start() # 시작시간 기록
 servtype = "POND"
-servtype = dbconn.getserverType(svrno)[0]
-serveryn = dbconn.getserverType(svrno)[1]
-
+servt = dbconn.getserverType(svrno)
+servtype = servt[0]
+serveryn = servt[1]
 if servtype is None :
     servtype = "POND"
 if serveryn is None :
     serveryn = "Y"
+service_start() # 시작시간 기록
+
 
 while True:
     print("구동 횟수 : ", str(cnt))
