@@ -870,8 +870,9 @@ def losscut(uno, coinn, gap):
     upbit = pyupbit.Upbit(keys[0], keys[1])
     walt = upbit.get_balances()
     crp = pyupbit.get_current_price(coinn)
+    vcoin = coinn[4:]
     for coin in walt:
-        if coin['currency'] == coinn:
+        if coin['currency'] == vcoin:
             balance = coin['balance']
             lcgap = (crp-coin['avg_buy_price'])/coin['avg_buy_price']
             result = upbit.sell_market_order(coinn, balance)
