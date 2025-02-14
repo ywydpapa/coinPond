@@ -769,7 +769,7 @@ def service_start():
         myip = (requests.get('https://api.ip.pe.kr/json/').json())['ip']
     except Exception as e:
         myip = "0.0.0.0"
-    msg = "Server " + str(svrno) + " Service Start : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : " + str(mainver) + ":" + str(servtype)
+    msg = "Multi Server " + str(svrno) + " Service Start : " + str(tstamp) + "  at  " + str(myip) + " Service Ver : " + str(mainver) + ":" + str(servtype)
     vermsg = str(mainver) + ":" + str(servtype)
     dbconn.servicelog(msg,0)
     dbconn.serviceStat(svrno, myip, vermsg)
