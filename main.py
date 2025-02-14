@@ -13,7 +13,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250214001
+mainver = 20250214002
 
 
 def loadmyset(uno):
@@ -339,6 +339,7 @@ def trService(svrno):
                     amtb = 0
                     addamt = 0
                     addamtb = 0
+                    prgap = 0
                     cnt = 0
                     cntb = 0
                     calamt = 0
@@ -357,6 +358,26 @@ def trService(svrno):
                     curprice = pyupbit.get_current_price(coinn)
                     print("코인 현재 시장가", str(curprice))
                     print("최초 매수 설정 금액 ", str(setup[2]) )
+                    print("매수 손실금", curprice - vcoinprice)
+                    if isinstance(curprice,(int, float)):
+                        if vcoinprice != 0:
+                            lcrate = (curprice - vcoinprice)/vcoinprice *100
+                        else:
+                            lcrate = 0
+                    else:
+                        send_error("TRACE 프로세서 실행중 현재가 불러오기 에러", uno)
+                        continue
+                    print("손실 비율 ", lcrate)
+                    if lcrate <= float(setup[5]) and float(setup[4]) == 1.0:
+                        try:
+                            print("손절 적용 조건 진입 : 손절 조건 ", setup[5])
+                            losscut(uno, coinn, lcrate)
+                            dbconn.lclog(uno, coinn, lcrate)
+                        except Exception as e:
+                            print("손절 적용 에러 ", e)
+                        finally:
+                            print("손절 적용 완료")
+                            continue
                     myorders = upbit.get_order(coinn, state='wait') #대기중 주문 조회
                     cntask = 0 #매도 주문수
                     cntbid = 0 #매수 주문수
@@ -909,7 +930,6 @@ if serveryn is None :
     serveryn = "Y"
 service_start() # 시작시간 기록
 
-
 while True:
     print("구동 횟수 : ", str(cnt))
     try:
@@ -930,4 +950,7 @@ while True:
     finally:
         if cnt > 3600:  # 0.5시간 마다 재시작
             cnt = 1
+            service_restart()
+        servt = dbconn.getserverType(svrno)
+        if servtype != servt[0]:
             service_restart()
