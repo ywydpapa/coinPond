@@ -411,6 +411,8 @@ def trService(svrno):
                                 print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6])," 최종 구매 금액 도달 통과")
                                 print("------------------------")
                                 continue
+                        # 갭체크 후 -3%인 경우 손절 실행
+
                     if amt == 0:
                         cntpost = 1
                         amt = float(netsz[int(cntpost-1)]) #현재 구매 설정 금액
