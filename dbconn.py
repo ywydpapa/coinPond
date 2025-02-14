@@ -129,6 +129,21 @@ def getupbitkey_tr(uno):
         db.close()
 
 
+def getupbitkey_tr(uno):
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur17 = db.cursor()
+    try:
+        sql = "SELECT apiKey1, apiKey2 FROM traceUser WHERE userNo=%s and attrib not like %s"
+        cur17.execute(sql, (uno,'%XXXUP'))
+        data = cur17.fetchone()
+        return data
+    except Exception as e:
+        print('접속오류',e)
+    finally:
+        cur17.close()
+        db.close()
+
+
 def clearcache():
     db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur18 = db.cursor()

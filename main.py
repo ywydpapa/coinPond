@@ -236,7 +236,6 @@ def order_mod_ask5(key1, key2, coinn, profit, uno):  #이윤 변동식 계산 �
 def add_new_bid(key1, key2, coinn, bidprice, bidvol, uno):
     try:
         ret = buylimitpr(key1, key2, coinn, bidprice, bidvol, uno)
-        tradelog(uno,"BID", coinn, datetime.now()) #주문 기록
         return ret
     except Exception as e:
         msg = "추가매수 진행 에러 "+str(e)
@@ -673,7 +672,7 @@ def pondService(svrno):
                             bidprice = round(addamt / float(setup[2])) * float(setup[2])
                         print("다음 매수 금액 : ",str(bidprice))
                         #다음 투자금 확인
-                        trsets = setdetail(setup[8]) #상세 투자 설정
+                        trsets = dbconn.setdetail(setup[8]) #상세 투자 설정
                         intvset = trsets[4:13] #투자설정 간격
                         marginset = trsets[14:23] #투자설정 이율
                         if cntpost-1 > setup[3]:
@@ -865,7 +864,7 @@ def chk_lastbid(coinn, uno, restmin):
 
 
 def losscut(uno, coinn, gap):
-    keys = dbconn.getupbitkey(uno)
+    keys = dbconn.getupbitkey_tr(uno)
     canclebidorder(keys[0],keys[1],coinn,uno)
     cancelaskorder(keys[0],keys[1],coinn,uno)
     upbit = pyupbit.Upbit(keys[0], keys[1])
