@@ -874,7 +874,7 @@ def losscut(uno, coinn, gap):
     for coin in walt:
         if coin['currency'] == vcoin:
             balance = coin['balance']
-            lcgap = (crp-coin['avg_buy_price'])/coin['avg_buy_price']
+            lcgap = (float(crp)-float(coin['avg_buy_price']))/float(coin['avg_buy_price'])
             result = upbit.sell_market_order(coinn, balance)
             if result is not None:
                 dbconn.lclog(coinn, uno, lcgap)
