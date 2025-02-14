@@ -13,7 +13,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250214003
+mainver = 20250214005
 
 
 def loadmyset(uno):
