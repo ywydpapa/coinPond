@@ -371,7 +371,6 @@ def trService(svrno):
                         try:
                             print("손절 적용 조건 진입 : 손절 조건 ", setup[5])
                             losscut(uno, coinn, lcrate)
-                            dbconn.lclog(uno, coinn, lcrate)
                         except Exception as e:
                             print("손절 적용 에러 ", e)
                         finally:
