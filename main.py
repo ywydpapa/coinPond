@@ -13,7 +13,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250217001
+mainver = 20250217002
 
 
 def loadmyset(uno):
@@ -342,6 +342,7 @@ def trService(svrno):
                     cnt = 0
                     cntb = 0
                     calamt = 0
+                    bcoinprice = 0
                     ordtype = 0 #주문 종류
                     for coin in mycoins:
                         if coin["currency"] == "KRW":
@@ -383,6 +384,7 @@ def trService(svrno):
                                 lastbidsec = (nowt - last).seconds
                             elif order["side"] == "bid":
                                 cntbid = cntbid + 1 #매수 주문 수 카운트
+                                bcoinprice = order["price"] #주문 가격
                     else: # 둘다 없을때 0으로 설정
                         cntask = 0
                         cntbid = 0
@@ -422,6 +424,9 @@ def trService(svrno):
                         elif order['side'] == 'bid':
                             amtb = float(order['volume']) * float(order['price'])
                             print("기존 매수 주문 금액 ", str(amtb))
+                            print("기존 매수 주문 단가 ", str(order['price']))
+                            bdrate = (float(curprice)-float(order['price'])) / float(curprice)
+                            print("매수가와 현재가 비율 :", str(bdrate))
                         else:
                             print("기존 매수 없음")
                         if cntpost > 10: #최대 구매 상태 도달
