@@ -13,7 +13,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250214005
+mainver = 20250217001
 
 
 def loadmyset(uno):
@@ -367,15 +367,6 @@ def trService(svrno):
                         send_error("TRACE 프로세서 실행중 현재가 불러오기 에러", uno)
                         continue
                     print("손실 비율 ", lcrate)
-                    if lcrate <= float(setup[5]) and float(setup[4]) == 1.0:
-                        try:
-                            print("손절 적용 조건 진입 : 손절 조건 ", setup[5])
-                            losscut(uno, coinn, lcrate)
-                        except Exception as e:
-                            print("손절 적용 에러 ", e)
-                        finally:
-                            print("손절 적용 완료")
-                            continue
                     myorders = upbit.get_order(coinn, state='wait') #대기중 주문 조회
                     cntask = 0 #매도 주문수
                     cntbid = 0 #매수 주문수
@@ -398,6 +389,17 @@ def trService(svrno):
                     cntpost = 0 #매수 회차 산출 프로세스
                     print("현재 매도주문수 ", str(cntask))
                     print("현재 매수주문수 ", str(cntbid))
+                    # 손절 실행
+                    if lcrate <= float(setup[5]) and float(setup[4]) == 1.0 and cntbid == 0: #손절비율 초과, 손절YN, 매수주문 없음일 경우 손절 실행
+                        try:
+                            print("손절 적용 조건 진입 : 손절 조건 ", setup[5])
+                            losscut(uno, coinn, lcrate)
+                            print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6])," 손절 조건에 따른 손절 실행 통과")
+                        except Exception as e:
+                            print("손절 적용 에러 ", e)
+                        finally:
+                            print("손절 적용 완료")
+                            continue
                     # 상세 설정
                     trsets = dbconn.setdetail_tr(setup[8])  # 상세 투자 설정 Trace 로 설정 변경
                     mrate = float(setup[2]/10000)
