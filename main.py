@@ -394,7 +394,7 @@ def trService(svrno):
                         try:
                             print("손절 적용 조건 진입 : 손절 조건 ", setup[5])
                             losscut(uno, coinn, lcrate)
-                            print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6])," 손절 조건에 따른 손절 실행 통과")
+                            print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6])," 손절 조건에 따른 손절 실행")
                         except Exception as e:
                             print("손절 적용 에러 ", e)
                         finally:
@@ -866,8 +866,7 @@ def chk_lastbid(coinn, uno, restmin):
 
 def losscut(uno, coinn, gap):
     keys = dbconn.getupbitkey_tr(uno)
-    canclebidorder(keys[0],keys[1],coinn,uno)
-    cancelaskorder(keys[0],keys[1],coinn,uno)
+    cancelaskorder(keys[0],keys[1],coinn,uno) #기존 매도주문 취소
     upbit = pyupbit.Upbit(keys[0], keys[1])
     walt = upbit.get_balances()
     crp = pyupbit.get_current_price(coinn)
