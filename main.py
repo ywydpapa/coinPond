@@ -13,7 +13,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250218001
+mainver = 20250218002
 
 
 def loadmyset(uno):
@@ -905,9 +905,10 @@ def losscut(uno, coinn, gap):
         if coin['currency'] == vcoin:
             balance = coin['balance']
             lcgap = (float(crp)-float(coin['avg_buy_price']))/float(coin['avg_buy_price'])
+            lcamt = float(crp) * float(balance)
             result = upbit.sell_market_order(coinn, balance)
             if result is not None:
-                dbconn.lclog(coinn, uno, lcgap)
+                dbconn.lclog(coinn, uno, lcgap, lcamt)
         else:
             pass
 

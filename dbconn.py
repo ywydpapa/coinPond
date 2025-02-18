@@ -316,13 +316,13 @@ def getserverType(sno):
         db37.close()
         return rows
 
-def lclog(coinn,uno,gap):
+def lclog(coinn,uno,gap, lcamt):
     global rows
     db38 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur38 = db38.cursor()
     try:
-        sql = "INSERT INTO lcLog (lcCoinn,userNo,lcGap) VALUES (%s, %s, %s)"
-        cur38.execute(sql,(coinn,uno,gap))
+        sql = "INSERT INTO lcLog (lcCoinn,userNo,lcGap,lcAmt ) VALUES (%s, %s, %s, %s)"
+        cur38.execute(sql,(coinn,uno,gap,lcamt))
         db38.commit()
     except Exception as e:
         print('손절상태 Log 기록 에러', e)
