@@ -242,6 +242,16 @@ def add_new_bid(key1, key2, coinn, bidprice, bidvol, uno):
         send_error(msg, uno)
 
 
+def add_multi_bid(key1, key2, coinn, bidprice, bidvol, gaps, times, uno):
+    try:
+        for i in range(times):
+            ret = buylimitpr(key1, key2, coinn, bidprice, bidvol, uno)
+        return ret
+    except Exception as e:
+        msg = "추가 멀티 매수 진행 에러 "+str(e)
+        send_error(msg, uno)
+
+
 def first_trade(key1, key2, coinn, initAsset, intergap, profit, uno):
     global buyrest, bidasset, bidcnt, askcnt
     print("새로운 주문 함수 실행")
