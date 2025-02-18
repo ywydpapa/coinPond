@@ -13,7 +13,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250217002
+mainver = 20250218001
 
 
 def loadmyset(uno):
@@ -391,17 +391,6 @@ def trService(svrno):
                     cntpost = 0 #매수 회차 산출 프로세스
                     print("현재 매도주문수 ", str(cntask))
                     print("현재 매수주문수 ", str(cntbid))
-                    # 손절 실행
-                    if lcrate <= float(setup[5]) and float(setup[4]) == 1.0 and cntbid == 0: #손절비율 초과, 손절YN, 매수주문 없음일 경우 손절 실행
-                        try:
-                            print("손절 적용 조건 진입 : 손절 조건 ", setup[5])
-                            losscut(uno, coinn, lcrate)
-                            print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6])," 손절 조건에 따른 손절 실행")
-                        except Exception as e:
-                            print("손절 적용 에러 ", e)
-                        finally:
-                            print("손절 적용 완료")
-                            continue
                     # 상세 설정
                     trsets = dbconn.setdetail_tr(setup[8])  # 상세 투자 설정 Trace 로 설정 변경
                     mrate = float(setup[2]/10000)
@@ -436,7 +425,6 @@ def trService(svrno):
                                 print("------------------------")
                                 continue
                         # 갭체크 후 -3%인 경우 손절 실행
-
                     if amt == 0:
                         cntpost = 1
                         amt = float(netsz[int(cntpost-1)]) #현재 구매 설정 금액
@@ -497,6 +485,21 @@ def trService(svrno):
                             continue
                     else:
                         print("구매한계 금액 설정 없음")
+                    if float(setup[4]) == 1.0:
+                        # 손절 실행
+                        if lcrate <= float(setup[5]) and cntbid == 0 and mywon < bidprice:  # 손절비율 초과, 매수주문 없음, 잔고가 비용보다 적은 경우 손절 실행
+                            try:
+                                print("손절 적용 조건 진입 : 손절 조건 ", setup[5])
+                                losscut(uno, coinn, lcrate)
+                                print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]),
+                                      " 손절 조건에 따른 손절 실행")
+                            except Exception as e:
+                                print("손절 적용 에러 ", e)
+                            finally:
+                                print("손절 적용 완료")
+                                continue
+                    else:
+                        print('손절 기능 비활성화')
                     if myrestvcoin != 0:
                         print("잔여 코인 존재: ", myrestvcoin)
                         order_mod_ask5(keys[0], keys[1], coinn, bidmargin, uno)
