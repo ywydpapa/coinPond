@@ -487,17 +487,29 @@ def trService(svrno):
                         print("구매한계 금액 설정 없음")
                     if float(setup[4]) == 1.0:
                         # 손절 실행
-                        if lcrate <= float(setup[5]) and cntbid == 0 and mywon < bidprice:  # 손절비율 초과, 매수주문 없음, 잔고가 비용보다 적은 경우 손절 실행
-                            try:
-                                print("손절 적용 조건 진입 : 손절 조건 ", setup[5])
-                                losscut(uno, coinn, lcrate)
-                                print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]),
-                                      " 손절 조건에 따른 손절 실행")
-                            except Exception as e:
-                                print("손절 적용 에러 ", e)
-                            finally:
-                                print("손절 적용 완료")
-                                continue
+                        if lcrate <= float(setup[5]):
+                            if cntpost < 10 and mywon < bidprice:
+                                try:
+                                    print("손절 적용 조건 진입 : 손절 조건 (자금 부족)", setup[5])
+                                    losscut(uno, coinn, lcrate)
+                                    print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 손절 조건에 따른 손절 실행")
+                                except Exception as e:
+                                    print("손절 적용 에러 ", e)
+                                finally:
+                                    print("손절 적용 완료")
+                                    continue
+                            elif cntpost == 10: #최종 단계 도달
+                                try:
+                                    print("손절 적용 조건 진입 : 손절 조건 (최대 매입)", setup[5])
+                                    losscut(uno, coinn, lcrate)
+                                    print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]), " 손절 조건에 따른 손절 실행")
+                                except Exception as e:
+                                    print("손절 적용 에러 ", e)
+                                finally:
+                                    print("손절 적용 완료")
+                                    continue
+                            else:
+                                print("손절 조건 통과 손절하지 않음!!")
                     else:
                         print('손절 기능 비활성화')
                     if myrestvcoin != 0:
