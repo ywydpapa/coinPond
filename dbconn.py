@@ -7,14 +7,12 @@ import random
 import pandas as pd
 import dotenv
 
-
 dotenv.load_dotenv()
 hostenv = os.getenv("host")
 userenv = os.getenv("user")
 passwordenv = os.getenv("password")
 dbenv = os.getenv("db")
 charsetenv = os.getenv("charset")
-
 
 db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
 serviceNo = 250204
@@ -57,11 +55,11 @@ def getseton():
     print("GetKey !!")
     try:
         sql = "SELECT userNo from tradingSetup where attrib not like %s"
-        cur15.execute(sql,'%XXXUP')
+        cur15.execute(sql, '%XXXUP')
         data = cur15.fetchall()
         return data
     except Exception as e:
-        print('접속오류',e)
+        print('접속오류', e)
     finally:
         cur15.close()
         db.close()
@@ -73,11 +71,11 @@ def getsetonsvr(svrNo):
     data = []
     try:
         sql = "SELECT distinct userNo from tradingSetup where attrib not like %s and serverNo=%s"
-        cur16.execute(sql,('%XXXUP', svrNo))
+        cur16.execute(sql, ('%XXXUP', svrNo))
         data = cur16.fetchall()
         return data
     except Exception as e:
-        print('접속오류',e)
+        print('접속오류', e)
     finally:
         cur16.close()
         db.close()
@@ -89,11 +87,11 @@ def getsetonsvr_tr(svrNo):
     data = []
     try:
         sql = "SELECT distinct userNo from traceSetup where attrib not like %s and serverNo=%s"
-        cur16.execute(sql,('%XXXUP', svrNo))
+        cur16.execute(sql, ('%XXXUP', svrNo))
         data = cur16.fetchall()
         return data
     except Exception as e:
-        print('접속오류',e)
+        print('접속오류', e)
     finally:
         cur16.close()
         db.close()
@@ -104,11 +102,11 @@ def getupbitkey(uno):
     cur17 = db.cursor()
     try:
         sql = "SELECT apiKey1, apiKey2 FROM pondUser WHERE userNo=%s and attrib not like %s"
-        cur17.execute(sql, (uno,'%XXXUP'))
+        cur17.execute(sql, (uno, '%XXXUP'))
         data = cur17.fetchone()
         return data
     except Exception as e:
-        print('접속오류',e)
+        print('접속오류', e)
     finally:
         cur17.close()
         db.close()
@@ -119,11 +117,11 @@ def getupbitkey_tr(uno):
     cur17 = db.cursor()
     try:
         sql = "SELECT apiKey1, apiKey2 FROM traceUser WHERE userNo=%s and attrib not like %s"
-        cur17.execute(sql, (uno,'%XXXUP'))
+        cur17.execute(sql, (uno, '%XXXUP'))
         data = cur17.fetchone()
         return data
     except Exception as e:
-        print('접속오류',e)
+        print('접속오류', e)
     finally:
         cur17.close()
         db.close()
@@ -134,11 +132,11 @@ def getupbitkey_tr(uno):
     cur17 = db.cursor()
     try:
         sql = "SELECT apiKey1, apiKey2 FROM traceUser WHERE userNo=%s and attrib not like %s"
-        cur17.execute(sql, (uno,'%XXXUP'))
+        cur17.execute(sql, (uno, '%XXXUP'))
         data = cur17.fetchone()
         return data
     except Exception as e:
-        print('접속오류',e)
+        print('접속오류', e)
     finally:
         cur17.close()
         db.close()
@@ -187,13 +185,13 @@ def setdetail_tr(setno):
     return rows
 
 
-def errlog(err,userno):
+def errlog(err, userno):
     global rows
     db28 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur28 = db28.cursor()
     try:
         sql = "INSERT INTO error_Log (error_detail, userNo) VALUES (%s, %s)"
-        cur28.execute(sql,(err, userno))
+        cur28.execute(sql, (err, userno))
         db28.commit()
     except Exception as e:
         print('접속오류', e)
@@ -202,13 +200,13 @@ def errlog(err,userno):
         db28.close()
 
 
-def servicelog(log,userno):
+def servicelog(log, userno):
     global rows
     db30 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur30 = db30.cursor()
     try:
         sql = "INSERT INTO service_Log (service_detail, userNo) VALUES (%s, %s)"
-        cur30.execute(sql,(log,userno))
+        cur30.execute(sql, (log, userno))
         db30.commit()
     except Exception as e:
         print('접속오류 서비스로그', e)
@@ -217,7 +215,7 @@ def servicelog(log,userno):
         db30.close()
 
 
-def tradelog(uno,type,coinn,tstamp):
+def tradelog(uno, type, coinn, tstamp):
     global rows
     db32 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur32 = db32.cursor()
@@ -225,7 +223,7 @@ def tradelog(uno,type,coinn,tstamp):
         if tstamp == "":
             tstamp = datetime.now()
         sql = "INSERT INTO tradeLog (userNo, tradeType, coinName, regDate) VALUES (%s, %s, %s, %s)"
-        cur32.execute(sql,(uno, type, coinn, tstamp))
+        cur32.execute(sql, (uno, type, coinn, tstamp))
         db32.commit()
     except Exception as e:
         print('트레이드 로그실행 오류', e)
@@ -234,13 +232,13 @@ def tradelog(uno,type,coinn,tstamp):
         db32.close()
 
 
-def getlog(uno,type,coinn):
+def getlog(uno, type, coinn):
     global rows
-    db33= pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
-    cur33= db33.cursor()
+    db33 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur33 = db33.cursor()
     try:
         sql = "SELECT regDate FROM tradeLog where userNo = %s and attrib = %s and tradeType = %s and coinName = %s"
-        cur33.execute(sql, (uno,'100001000010000' ,type, coinn))
+        cur33.execute(sql, (uno, '100001000010000', type, coinn))
         rows = cur33.fetchone()
     except Exception as e:
         print("트레이드 로그 조회 오류 ", e)
@@ -250,7 +248,7 @@ def getlog(uno,type,coinn):
         return rows
 
 
-def modifyLog(uuid,stat):
+def modifyLog(uuid, stat):
     global rows
     db34 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur34 = db34.cursor()
@@ -262,23 +260,27 @@ def modifyLog(uuid,stat):
             stat = "CONF0CONF0CONF0"
         else:
             stat = "UPD00UPD00UPD00"
-        cur34.execute(sql, (stat,uuid))
+        cur34.execute(sql, (stat, uuid))
         db34.commit()
     except Exception as e:
-        print('거래 기록 업데이트 에러',e)
+        print('거래 기록 업데이트 에러', e)
     finally:
         cur34.close()
         db34.close()
 
 
-def insertLog(uno,ldata01,ldata02,ldata03,ldata04,ldata05,ldata06,ldata07,ldata08,ldata09,ldata10,ldata11,ldata12,ldata13,ldata14,ldata15,ldata16):
+def insertLog(uno, ldata01, ldata02, ldata03, ldata04, ldata05, ldata06, ldata07, ldata08, ldata09, ldata10, ldata11,
+              ldata12, ldata13, ldata14, ldata15, ldata16):
     global rows
     db35 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur35 = db35.cursor()
     try:
-        sql = ("insert into tradeLogDetail (userNo,orderDate,uuid,side,ord_type,price,market,created_at,volume,remaining_volume,reserved_fee,paid_fee,locked,executed_volume,excuted_funds,trades_count,time_in_force)"
-               " values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)")
-        cur35.execute(sql,(uno,ldata01,ldata02,ldata03,ldata04,ldata05,ldata06,ldata07,ldata08,ldata09,ldata10,ldata11,ldata12,ldata13,ldata14,ldata15,ldata16))
+        sql = (
+            "insert into tradeLogDetail (userNo,orderDate,uuid,side,ord_type,price,market,created_at,volume,remaining_volume,reserved_fee,paid_fee,locked,executed_volume,excuted_funds,trades_count,time_in_force)"
+            " values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)")
+        cur35.execute(sql, (
+        uno, ldata01, ldata02, ldata03, ldata04, ldata05, ldata06, ldata07, ldata08, ldata09, ldata10, ldata11, ldata12,
+        ldata13, ldata14, ldata15, ldata16))
         db35.commit()
     except Exception as e:
         print("거래 기록 인서트 에러", e)
@@ -287,13 +289,13 @@ def insertLog(uno,ldata01,ldata02,ldata03,ldata04,ldata05,ldata06,ldata07,ldata0
         db35.close()
 
 
-def serviceStat(sno,sip,sver):
+def serviceStat(sno, sip, sver):
     global rows
     db36 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur36 = db36.cursor()
     try:
         sql = "INSERT INTO service_Stat (serverNo,serviceIp,serviceVer) VALUES (%s, %s, %s)"
-        cur36.execute(sql,(sno,sip,sver))
+        cur36.execute(sql, (sno, sip, sver))
         db36.commit()
     except Exception as e:
         print('접속상태 Log 기록 에러', e)
@@ -301,13 +303,14 @@ def serviceStat(sno,sip,sver):
         cur36.close()
         db36.close()
 
+
 def getserverType(sno):
     global rows
     db37 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur37 = db37.cursor()
     try:
         sql = "select serviceType, serviceYN from serverSet where serverNo = %s and attrib not like %s"
-        cur37.execute(sql,(sno, "XXXUP%"))
+        cur37.execute(sql, (sno, "XXXUP%"))
         rows = cur37.fetchone()
     except Exception as e:
         print('서버 서비스 조회', e)
@@ -316,13 +319,14 @@ def getserverType(sno):
         db37.close()
         return rows
 
-def lclog(coinn,uno,gap, lcamt):
+
+def lclog(coinn, uno, gap, lcamt):
     global rows
     db38 = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur38 = db38.cursor()
     try:
         sql = "INSERT INTO lcLog (lcCoinn,userNo,lcGap,lcAmt ) VALUES (%s, %s, %s, %s)"
-        cur38.execute(sql,(coinn,uno,gap,lcamt))
+        cur38.execute(sql, (coinn, uno, gap, lcamt))
         db38.commit()
     except Exception as e:
         print('손절상태 Log 기록 에러', e)
