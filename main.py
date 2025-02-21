@@ -12,7 +12,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250221001
+mainver = 20250221002
 
 
 def loadmyset(uno):
@@ -550,7 +550,7 @@ def trService(svrno):
                         if netyn[cntpr] == 'Y':
                             bidcalprice = bideaprice
                             print("네트타입 구매")
-                            for i in range(cntnx):
+                            for i in range(int(settimes)):
                                 if i == 0:
                                     add_new_bid(keys[0], keys[1], coinn, bideaprice, bidvolume, uno)
                                 else:
