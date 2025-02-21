@@ -499,7 +499,7 @@ def trService(svrno):
                             if cntpost < 10 and mywon < bidprice:
                                 try:
                                     print("손절 적용 조건 진입 : 손절 조건 (자금 부족)", setup[5])
-                                    losscut(uno, coinn, lcrate)
+                                    losscut(uno, coinn, lcrate, mywon)
                                     print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]),
                                           " 손절 조건에 따른 손절 실행")
                                 except Exception as e:
@@ -510,7 +510,7 @@ def trService(svrno):
                             elif cntpost == 10:  # 최종 단계 도달
                                 try:
                                     print("손절 적용 조건 진입 : 손절 조건 (최대 매입)", setup[5])
-                                    losscut(uno, coinn, lcrate)
+                                    losscut(uno, coinn, lcrate, mywon)
                                     print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]),
                                           " 손절 조건에 따른 손절 실행")
                                 except Exception as e:
@@ -925,7 +925,7 @@ def chk_lastbid(coinn, uno, restmin):
         print("직전 구매 이력 없음")
 
 
-def losscut(uno, coinn, gap):
+def losscut(uno, coinn, gap, mywon):
     keys = dbconn.getupbitkey_tr(uno)
     cancelaskorder(keys[0], keys[1], coinn, uno)  # 기존 매도주문 취소
     upbit = pyupbit.Upbit(keys[0], keys[1])
@@ -939,7 +939,7 @@ def losscut(uno, coinn, gap):
             lcamt = float(crp) * float(balance)
             result = upbit.sell_market_order(coinn, balance)
             if result is not None:
-                dbconn.lclog(coinn, uno, lcgap, lcamt)
+                dbconn.lclog(coinn, uno, lcgap, lcamt, mywon)
         else:
             pass
 
