@@ -12,7 +12,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250221002
+mainver = 20250222001
 
 
 def loadmyset(uno):
@@ -496,6 +496,7 @@ def trService(svrno):
                     if float(setup[4]) == 1.0:
                         # 손절 실행
                         if lcrate <= float(setup[5]):
+
                             if cntpost < 10 and mywon < bidprice:
                                 try:
                                     print("손절 적용 조건 진입 : 손절 조건 (자금 부족)", setup[5])
@@ -936,10 +937,11 @@ def losscut(uno, coinn, gap, mywon):
         if coin['currency'] == vcoin:
             balance = coin['balance']
             lcgap = (float(crp) - float(coin['avg_buy_price'])) / float(coin['avg_buy_price'])
+            lossamt = (float(crp) - float(coin['avg_buy_price'])) * float(balance)
             lcamt = float(crp) * float(balance)
             result = upbit.sell_market_order(coinn, balance)
             if result is not None:
-                dbconn.lclog(coinn, uno, lcgap, lcamt, mywon)
+                dbconn.lclog(coinn, uno, lcgap, lcamt, mywon, lossamt)
         else:
             pass
 
