@@ -12,7 +12,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250222001
+mainver = 20250224001
 
 
 def loadmyset(uno):
@@ -503,6 +503,9 @@ def trService(svrno):
                                     losscut(uno, coinn, lcrate, mywon)
                                     print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]),
                                           " 손절 조건에 따른 손절 실행")
+                                    if setup[12] == 'Y':
+                                        print("손절 후 자동 멈춤 실행")
+                                        dbconn.setonoff(str(setup[0]), 'N')
                                 except Exception as e:
                                     print("손절 적용 에러 ", e)
                                 finally:
@@ -514,6 +517,9 @@ def trService(svrno):
                                     losscut(uno, coinn, lcrate, mywon)
                                     print("TR사용자 ", str(setup[1]), "설정번호 ", str(setup[0]), " 코인 ", str(setup[6]),
                                           " 손절 조건에 따른 손절 실행")
+                                    if setup[12] == 'Y':
+                                        print("손절 후 자동 멈춤 실행")
+                                        dbconn.setonoff(str(setup[0]), 'N')
                                 except Exception as e:
                                     print("손절 적용 에러 ", e)
                                 finally:

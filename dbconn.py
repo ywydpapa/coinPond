@@ -333,3 +333,17 @@ def lclog(coinn, uno, gap, lcamt, mywon, lossamt):
     finally:
         cur38.close()
         db38.close()
+
+
+def setonoff(sno, yesno):
+    db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
+    cur39 = db.cursor()
+    try:
+        sql = "UPDATE traceSetup SET activeYN = %s where setupNo=%s"
+        cur39.execute(sql, (yesno, sno))
+        db.commit()
+    except Exception as e:
+        print('상태 업데이트 오류', e)
+    finally:
+        cur39.close()
+        db.close()
