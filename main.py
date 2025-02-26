@@ -12,7 +12,7 @@ import requests
 dotenv.load_dotenv()
 bidcnt = 1
 svrno = os.getenv("server_no")
-mainver = 20250224001
+mainver = 20250226001
 
 
 def loadmyset(uno):
@@ -1022,5 +1022,6 @@ while True:
             cnt = 1
             service_restart()
         servt = dbconn.getserverType(svrno)
-        if servtype != servt[0]:
-            service_restart()
+        if servt[0] is not None:
+            if servtype != servt[0]:
+                service_restart()
