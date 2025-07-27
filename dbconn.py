@@ -33,7 +33,8 @@ def getmsetup(uno):
         db.close()
 
 
-def getmsetup_tr(uno):
+def \
+        getmsetup_tr(uno):
     db = pymysql.connect(host=hostenv, user=userenv, password=passwordenv, db=dbenv, charset=charsetenv)
     cur13 = db.cursor()
     try:
